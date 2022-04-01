@@ -4,20 +4,20 @@ import net.valneas.account.api.commands.AccountCommand;
 import net.valneas.account.api.commands.RankCommand;
 import net.valneas.account.listener.*;
 import net.valneas.account.mongo.Mongo;
+import net.valneas.account.permission.PermissionDatabase;
+import net.valneas.account.permission.PermissionDispatcher;
 import net.valneas.account.util.MongoUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.io.*;
 
 public class AccountSystem extends JavaPlugin {
 
     private Mongo mongo;
     private MongoUtil mongoUtil;
+    private PermissionDatabase permissionDatabase;
+    private PermissionDispatcher permissionDispatcher;
 
     /**
      * This field will be used to choose between finding the player in the whole proxy
@@ -38,19 +38,10 @@ public class AccountSystem extends JavaPlugin {
 
         mongo = new Mongo(this);
         mongoUtil = new MongoUtil(this);
+        permissionDatabase = new PermissionDatabase(this);
+        permissionDispatcher = new PermissionDispatcher(this);
 
-        File spigotYml = new File("../../../" + getDataFolder(), "spigot.yml");
-        YamlConfiguration yml = YamlConfiguration.loadConfiguration(spigotYml);
-        bungeeMode = yml.getBoolean("settings.bungeecord");
-
-        if(bungeeMode){
-            getLogger().info("---------------------------------------------");
-            getLogger().info("Warning: field in spigot.yml called bungeecord is enabled!");
-            getLogger().info("Switching to bungeecord mode...");
-            getLogger().info("Now the system will act like if there is a bungeecord linked with the server.");
-            getLogger().info("If it's not, please disable this field or some functionalities won't be available.");
-            getLogger().info("---------------------------------------------");
-        }
+        this.permissionDispatcher.onEnable();
 
         registerEvents();
         getCommand("rank").setExecutor(new RankCommand(this));
@@ -105,5 +96,13 @@ public class AccountSystem extends JavaPlugin {
      */
     public boolean isBungeeMode() {
         return bungeeMode;
+    }
+
+    public PermissionDatabase getPermissionDatabase() {
+        return permissionDatabase;
+    }
+
+    public PermissionDispatcher getPermissionDispatcher() {
+        return permissionDispatcher;
     }
 }
