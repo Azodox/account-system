@@ -33,5 +33,6 @@ public class PlayerJoinListener implements Listener {
 
         accountManager.setLastConnection(current);
         accountManager.setLastIp(PlayerUtil.getIp(player));
+        this.main.getPermissionDispatcher().set(player);
     }
 }
