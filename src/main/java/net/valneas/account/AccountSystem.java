@@ -1,16 +1,19 @@
 package net.valneas.account;
 
 import net.valneas.account.api.commands.AccountCommand;
+import net.valneas.account.api.commands.PermissionCommand;
 import net.valneas.account.api.commands.RankCommand;
 import net.valneas.account.listener.*;
 import net.valneas.account.mongo.Mongo;
 import net.valneas.account.permission.PermissionDatabase;
 import net.valneas.account.permission.PermissionDispatcher;
 import net.valneas.account.util.MongoUtil;
-import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
 
 public class AccountSystem extends JavaPlugin {
 
@@ -43,9 +46,23 @@ public class AccountSystem extends JavaPlugin {
 
         this.permissionDispatcher.onEnable();
 
+        File spigotYml = new File("../../../" + getDataFolder(), "spigot.yml");
+        YamlConfiguration yml = YamlConfiguration.loadConfiguration(spigotYml);
+        bungeeMode = yml.getBoolean("settings.bungeecord");
+
+        if(bungeeMode){
+            getLogger().info("---------------------------------------------");
+            getLogger().info("Warning: field in spigot.yml called bungeecord is enabled!");
+            getLogger().info("Switching to bungeecord mode...");
+            getLogger().info("Now the system will act like if there is a bungeecord linked with the server.");
+            getLogger().info("If it's not, please disable this field or some functionalities won't be available.");
+            getLogger().info("---------------------------------------------");
+        }
+
         registerEvents();
         getCommand("rank").setExecutor(new RankCommand(this));
         getCommand("account").setExecutor(new AccountCommand(this));
+        getCommand("permission").setExecutor(new PermissionCommand(this));
 
         getServer().getServicesManager().register(AccountSystem.class, this, this, ServicePriority.Normal);
         getLogger().info("Enabled!");
@@ -90,19 +107,19 @@ public class AccountSystem extends JavaPlugin {
         return mongoUtil;
     }
 
-    /**
-     * Check if bungeeMode is enabled.
-     * @return bungeeMode
-     */
-    public boolean isBungeeMode() {
-        return bungeeMode;
-    }
-
     public PermissionDatabase getPermissionDatabase() {
         return permissionDatabase;
     }
 
     public PermissionDispatcher getPermissionDispatcher() {
         return permissionDispatcher;
+    }
+
+    /**
+     * Check if bungeeMode is enabled.
+     * @return bungeeMode
+     */
+    public boolean isBungeeMode() {
+        return bungeeMode;
     }
 }
