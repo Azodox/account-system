@@ -9,3 +9,5 @@ commands:
     description: Add/Remove/Show ranks from a player
   account:
     description: Manage accounts
+  permission:
+    description: Manage permissions
