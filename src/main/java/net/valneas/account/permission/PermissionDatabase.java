@@ -36,6 +36,7 @@ public class PermissionDatabase {
                 new Document("permission", permission.permission())
                 .append("players", permission.players() == null ? null : permission.players().stream().map(UUID::toString).collect(Collectors.toList()))
                 .append("ranks", permission.ranks() == null ? null : permission.ranks().stream().map(RankUnit::name).collect(Collectors.toList()))
+                .append("except", permission.exceptions() == null ? null : permission.exceptions().stream().map(DatabaseExceptionParser::parse).collect(Collectors.toList()))
         );
     }
 
@@ -59,7 +60,8 @@ public class PermissionDatabase {
 
         return new Permission(document.getString("permission"),
                 document.getList("players", String.class) == null ? null : document.getList("players", String.class).stream().map(UUID::fromString).collect(Collectors.toSet()),
-                document.getList("ranks", String.class) == null ? null : document.getList("ranks", String.class).stream().map(RankUnit::valueOf).collect(Collectors.toSet()));
+                document.getList("ranks", String.class) == null ? null : document.getList("ranks", String.class).stream().map(RankUnit::valueOf).collect(Collectors.toSet()),
+                document.getList("except", String.class) == null ? null : document.getList("except", String.class).stream().map(DatabaseExceptionParser::parse).collect(Collectors.toSet()));
     }
 
     public void setPlayerPermission(Player player){
@@ -81,7 +83,9 @@ public class PermissionDatabase {
         return this.getCollection().find().filter(Filters.ne("permission", null))
                 .map(document -> new Permission(document.getString("permission"),
                             document.get("players") == null ? null : document.get("players") instanceof List ? document.getList("players", String.class).stream().map(UUID::fromString).collect(Collectors.toSet()) : null,
-                            document.get("ranks") == null ? null : document.get("ranks") instanceof List ? document.getList("ranks", String.class).stream().map(RankUnit::valueOf).collect(Collectors.toSet()) : null))
+                            document.get("ranks") == null ? null : document.get("ranks") instanceof List ? document.getList("ranks", String.class).stream().map(RankUnit::valueOf).collect(Collectors.toSet()) : null,
+                            document.get("except") == null ? null : document.get("except") instanceof List ? document.getList("except", String.class).stream().map(DatabaseExceptionParser::parse).collect(Collectors.toSet()) : null)
+                        )
                 .into(new ArrayList<>());
     }
 
@@ -107,8 +111,33 @@ public class PermissionDatabase {
         return this.mongo.getDatabase(this.accountSystem.getConfig().getString("mongodb.database"));
     }
 
-    public record Permission(String permission, Set<UUID> players, Set<RankUnit> ranks) {
+    public record Permission(String permission, Set<UUID> players, Set<RankUnit> ranks, Set<Object> exceptions){ }
 
+    private static class DatabaseExceptionParser {
+        public static <T> T parse(String value){
+            if(value == null) return null;
+
+            try {
+                return (T) RankUnit.valueOf(value);
+            } catch (IllegalArgumentException e){
+                try {
+                    return (T) UUID.fromString(value);
+                } catch (IllegalArgumentException e1){
+                    return null;
+                }
+            }
+        }
+
+        public static String parse(Object value){
+            if(value == null) return null;
+
+            if(value instanceof RankUnit){
+                return ((RankUnit) value).name();
+            } else if(value instanceof UUID){
+                return value.toString();
+            } else {
+                return null;
+            }
+        }
     }
-
 }

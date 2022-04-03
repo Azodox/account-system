@@ -27,11 +27,23 @@ public class PermissionDispatcher {
     }
 
     public void set(Player player, String permission, boolean state){
-        this.accountSystem.getPermissionDatabase().update(new PermissionDatabase.Permission(
-                state ? permission : '-' + permission,
-                Set.of(player.getUniqueId()),
-                null
-        ));
+        if(!state){
+            permission = '-' + permission;
+        }
+
+        var dbPermission = this.accountSystem.getPermissionDatabase().get(permission);
+
+        if(dbPermission == null){
+            this.accountSystem.getPermissionDatabase().update(new PermissionDatabase.Permission(
+                    permission,
+                    Set.of(player.getUniqueId()),
+                    null,
+                    null
+            ));
+        }else{
+            dbPermission.players().add(player.getUniqueId());
+            this.accountSystem.getPermissionDatabase().update(dbPermission);
+        }
         reloadPermissions(player);
     }
 
