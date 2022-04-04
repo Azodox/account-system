@@ -1,5 +1,7 @@
 package net.valneas.account;
 
+import io.github.llewvallis.commandbuilder.CommandBuilder;
+import io.github.llewvallis.commandbuilder.ReflectionCommandCallback;
 import net.valneas.account.api.commands.AccountCommand;
 import net.valneas.account.api.commands.PermissionCommand;
 import net.valneas.account.api.commands.RankCommand;
@@ -62,7 +64,7 @@ public class AccountSystem extends JavaPlugin {
         registerEvents();
         getCommand("rank").setExecutor(new RankCommand(this));
         getCommand("account").setExecutor(new AccountCommand(this));
-        getCommand("permission").setExecutor(new PermissionCommand(this));
+        new CommandBuilder().infer(new PermissionCommand(this)).build(new ReflectionCommandCallback(new PermissionCommand(this)), getCommand("permission"));
 
         getServer().getServicesManager().register(AccountSystem.class, this, this, ServicePriority.Normal);
         getLogger().info("Enabled!");
