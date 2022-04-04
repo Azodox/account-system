@@ -8,7 +8,7 @@ import java.util.List;
 
 public enum RankUnit {
 
-    ADMIN(1, 1, "Admin", "§4Admin ", "", ChatColor.DARK_RED),
+    ADMIN(1, 1, "Admin", net.md_5.bungee.api.ChatColor.of("#FDF617") + "\u2730 " + ChatColor.DARK_RED + "Admin ", "", ChatColor.DARK_RED),
     HEAD(2, 2, "Head", "Head-", "", ChatColor.BOLD),
     DEVELOPPEUR(3, 3, "Développeur", "§c§oDéveloppeur ", "", ChatColor.RED),
     DEVELOPPEUSE(4, 4, "Développeuse", "§c§oDéveloppeuse ", "", ChatColor.RED),
@@ -18,7 +18,7 @@ public enum RankUnit {
     MODERATRICE(8, 8, "Modératrice", "§2Modératrice ", "", ChatColor.DARK_GREEN),
     ASSISTANT(9, 9, "Assistant", "§aAssistant ", "", ChatColor.GREEN),
     ASSISTANTE(10, 10, "Assistante", "§aAssistante ", "", ChatColor.GREEN),
-    STAFF(11, 15, "Staff", "§d§oStaff ", "", ChatColor.LIGHT_PURPLE),
+    STAFF(11, 15, "Staff", "§d§o\u02726 Staff ", "", ChatColor.LIGHT_PURPLE),
     PARTENAIRE(12, 11, "Partenaire", "§6Partenaire ", "", ChatColor.GOLD),
     YOUTUBE(13, 12, "YouTube", "§c§nYouTube ", "", ChatColor.RED),
     TWITCH(14, 13, "Twitch", "§5§nTwitch ", "", ChatColor.DARK_PURPLE),
