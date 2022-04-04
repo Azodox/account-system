@@ -11,3 +11,4 @@ commands:
     description: Manage accounts
   permission:
     description: Manage permissions
+    usage: '/permission <add/remove/show> <target> [permission]'
