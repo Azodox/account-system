@@ -1,10 +1,12 @@
 package net.valneas.account;
 
 import io.github.llewvallis.commandbuilder.CommandBuilder;
+import io.github.llewvallis.commandbuilder.DefaultInferenceProvider;
 import io.github.llewvallis.commandbuilder.ReflectionCommandCallback;
 import net.valneas.account.api.commands.AccountCommand;
 import net.valneas.account.api.commands.PermissionCommand;
 import net.valneas.account.api.commands.RankCommand;
+import net.valneas.account.api.commands.arguments.PermissionArgument;
 import net.valneas.account.listener.*;
 import net.valneas.account.mongo.Mongo;
 import net.valneas.account.permission.PermissionDatabase;
@@ -63,6 +65,7 @@ public class AccountSystem extends JavaPlugin {
         registerEvents();
         getCommand("rank").setExecutor(new RankCommand(this));
         getCommand("account").setExecutor(new AccountCommand(this));
+        DefaultInferenceProvider.getGlobal().register(PermissionDatabase.Permission.class, new PermissionArgument());
         new CommandBuilder().infer(new PermissionCommand(this)).build(new ReflectionCommandCallback(new PermissionCommand(this)), getCommand("permission"));
 
         getServer().getServicesManager().register(AccountSystem.class, this, this, ServicePriority.Normal);
