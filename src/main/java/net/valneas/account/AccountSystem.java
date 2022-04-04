@@ -30,7 +30,6 @@ public class AccountSystem extends JavaPlugin {
      * with a BungeeCord then it's not necessary to chase him in the proxy because there isn't.
      * So anyway, in this case just use basic methods
      * @see MajorRankChangedListener
-     * @see Bukkit#getOnlinePlayers()
      */
     private boolean bungeeMode;
 
