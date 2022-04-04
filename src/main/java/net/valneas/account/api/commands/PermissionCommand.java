@@ -20,16 +20,16 @@ public class PermissionCommand {
     }
 
     @ExecuteCommand
-    public boolean permission(CommandContext ctx, @StringSetArgument.Arg({"add", "remove", "show", "reload"}) String operation, String targetInput, @OptionalArg PermissionDatabase.Permission permission) {
+    public void permission(CommandContext ctx, @StringSetArgument.Arg({"add", "remove", "show", "reload"}) String operation, String targetInput, @OptionalArg PermissionDatabase.Permission permission) {
         var target = PermissionDatabase.DatabaseParser.parse(targetInput);
         if(target == null){
-            return true;
+            return;
         }
 
         if(operation.equalsIgnoreCase("add")){
             this.accountSystem.getPermissionDispatcher().set(target, permission.permission());
             ctx.getSender().sendMessage("Good");
-            return true;
+            return;
         }
 
         if(operation.equalsIgnoreCase("remove")){
@@ -39,7 +39,7 @@ public class PermissionCommand {
         if(operation.equalsIgnoreCase("reload")){
             this.accountSystem.getPermissionDispatcher().reloadPermissions(target);
             ctx.getSender().sendMessage("Permissions de '" + target + "' rechargées ✔");
-            return true;
+            return;
         }
 
         if(operation.equalsIgnoreCase("show")){
@@ -51,7 +51,5 @@ public class PermissionCommand {
                 this.accountSystem.getPermissionDatabase().getRankPermissions(rankUnit).forEach(perm -> ctx.getSender().sendMessage(perm.permission()));
             }
         }
-
-        return false;
     }
 }
