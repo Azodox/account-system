@@ -1,7 +1,7 @@
-# account-system (v0.3.2)
+# account-system (v0.3.3)
 My original account system to manage accounts on a minecraft server.
 
-## Wiki | Développeurs
+## Développeurs
 
 ---
 
@@ -37,7 +37,7 @@ final Rank rank = account.newRankManager();
 
 **Attention : Cette méthode CREER une NOUVELLE instance de la classe Rank, vous n'obtiendrez donc pas la même instance à chaque fois que vous appelez cette méthode, c'est bien pour ça que le concept de variable a été inventé :smile:**
 
-## Wiki | Les commandes
+## Les commandes
 
 ### /rank
 La seule commande disponible actuellement est la commande /rank, elle permet de set le major rank de quelqu'un, voir ses rangs, lui ajouter un rang et lui en enlever un.
@@ -47,7 +47,7 @@ La seule commande disponible actuellement est la commande /rank, elle permet de 
 **/rank add [joueur/uuid] [id/nom du rang/power]** permet d'ajouter un rang fictif à un joueur\
 **/rank remove [joueur/uuid] [id/nom du rang/power]** permet de retirer un rang fictif à un joueur
 
-## Wiki | 'super-user'
+## 'super-user'
 
 Le champ super-user est ajouté manuellement à un compte dans la base de données
 Il est a été ajouté à 2 utilisateurs jusqu'à présent.
@@ -69,3 +69,10 @@ if(!accountManager.getAccount().containsKey("super-user") || !accountManager.get
 ```
 
 :warning: Cette version supporte le champ '**super-user**' :warning: 
+
+## Permissions
+
+Depuis la version __0.3.3__, un système de permission est disponible. En effet, celui va être lié à la base de données, il suffit de créer une collection dans la base de données nommée **permissions**. Ensuite, afin de gérer les permissions correctement, une commande est disponible : la commande `permission`.
+
+D'autre part, voici le pattern d'une permission (sous la forme d'un document BSON) dans la db :
+![pattern](https://i.ibb.co/Nmt5BK9/unknown.png)
