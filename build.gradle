@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'net.valneas'
-version '0.3.2-xmas'
+version '0.3.3-xmas'
 
 compileJava.options.encoding = 'UTF-8'
 sourceCompatibility = targetCompatibility = 17
