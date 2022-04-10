@@ -18,7 +18,7 @@ public enum RankUnit {
     MODERATRICE(8, 8, "Modératrice", "§2Modératrice ", "", ChatColor.DARK_GREEN),
     ASSISTANT(9, 9, "Assistant", "§aAssistant ", "", ChatColor.GREEN),
     ASSISTANTE(10, 10, "Assistante", "§aAssistante ", "", ChatColor.GREEN),
-    STAFF(11, 15, "Staff", "§d§o\u02726 Staff ", "", ChatColor.LIGHT_PURPLE),
+    STAFF(11, 15, "Staff", "§d\u2726§o Staff ", "", ChatColor.LIGHT_PURPLE),
     PARTENAIRE(12, 11, "Partenaire", "§6Partenaire ", "", ChatColor.GOLD),
     YOUTUBE(13, 12, "YouTube", "§c§nYouTube ", "", ChatColor.RED),
     TWITCH(14, 13, "Twitch", "§5§nTwitch ", "", ChatColor.DARK_PURPLE),
