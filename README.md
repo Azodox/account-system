@@ -85,4 +85,4 @@ Une commande est mise à disposition pour gérer les permissions :
 **/permission reload <target>** permet de recharger les permissions d'un joueur/une uuid/un rang\
 **/permission except <target> <permission>** permet d'ajouter une exception à une permission\
 **/permission unexcept <target> <permission>** permet de retirer une exception à une permission\
-**/setdefault <permission> <true/false>** permet de définir une permission par défaut ou non
+**/setdefault <a_permission> <true/false>** permet de définir une permission par défaut ou non
