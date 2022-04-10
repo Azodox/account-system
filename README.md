@@ -74,7 +74,15 @@ if(!accountManager.getAccount().containsKey("super-user") || !accountManager.get
 
 Depuis la version __0.3.3__, un système de permission est disponible. En effet, celui va être lié à la base de données, il suffit de créer une collection dans la base de données nommée **permissions**. Ensuite, afin de gérer les permissions correctement, une commande est disponible : la commande `permission`.
 
-D'autre part, voici le pattern d'une permission (sous la forme d'un document BSON) dans la db :
-![pattern](https://i.imgur.com/EjTKv08.png)
+D'autre part, voici le pattern d'une permission (sous la forme d'un document BSON) dans la db
+![pattern](https://i.imgur.com/E7nbZqu.png)
 
+Une commande est mise à disposition pour gérer les permissions :
 
+**/permission show <target>** permet de voir les permissions d'un joueur/une uuid/un rang\
+**/permission add <target> <permission>** permet d'ajouter une permission à un joueur/une uuid/un rang\
+**/permission remove <target> <permission>** permet de retirer une permission à un joueur/une uuid/un rang\
+**/permission reload <target>** permet de recharger les permissions d'un joueur/une uuid/un rang\
+**/permission except <target> <permission>** permet d'ajouter une exception à une permission\
+**/permission unexcept <target> <permission>** permet de retirer une exception à une permission\
+**/setdefault <permission> <true/false>** permet de définir une permission par défaut ou non
