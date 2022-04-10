@@ -14,7 +14,7 @@ public class PermissionArgument implements ArgumentParser<PermissionDatabase.Per
 
     @Override
     public PermissionDatabase.Permission parse(String argument, int position, CommandContext context) {
-        return new PermissionDatabase.Permission(argument, null, null, null);
+        return new PermissionDatabase.Permission(argument, false, Set.of(), Set.of(), Set.of());
     }
 
     @Override
