@@ -11,4 +11,7 @@ commands:
     description: Manage accounts
   permission:
     description: Manage permissions
-    usage: '/permission <add/remove/show> <target> [permission]'
+    usage: '/permission <add/remove/show/reload/except/unexcept> <target> [permission]'
+  setdefault:
+    description: Set default permissions
+    usage: '/setdefault <permission> <value>'
