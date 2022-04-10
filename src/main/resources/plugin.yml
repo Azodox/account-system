@@ -1,5 +1,5 @@
 name: AccountSystem
-version: 0.3.2-xmas
+version: @version@
 authors:
   - Azodox_
   - Virtual
@@ -9,3 +9,9 @@ commands:
     description: Add/Remove/Show ranks from a player
   account:
     description: Manage accounts
+  permission:
+    description: Manage permissions
+    usage: '/permission <add/remove/show/reload/except/unexcept> <target> [permission]'
+  setdefault:
+    description: Set default permissions
+    usage: '/setdefault <permission> <value>'

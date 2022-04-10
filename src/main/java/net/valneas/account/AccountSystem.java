@@ -1,23 +1,32 @@
 package net.valneas.account;
 
+import io.github.llewvallis.commandbuilder.CommandBuilder;
+import io.github.llewvallis.commandbuilder.DefaultInferenceProvider;
+import io.github.llewvallis.commandbuilder.ReflectionCommandCallback;
 import net.valneas.account.api.commands.AccountCommand;
+import net.valneas.account.api.commands.PermissionCommand;
 import net.valneas.account.api.commands.RankCommand;
+import net.valneas.account.api.commands.SetDefaultCommand;
+import net.valneas.account.api.commands.arguments.BooleanArgument;
+import net.valneas.account.api.commands.arguments.PermissionArgument;
 import net.valneas.account.listener.*;
 import net.valneas.account.mongo.Mongo;
+import net.valneas.account.permission.PermissionDatabase;
+import net.valneas.account.permission.PermissionDispatcher;
 import net.valneas.account.util.MongoUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.*;
+import java.io.File;
 
 public class AccountSystem extends JavaPlugin {
 
     private Mongo mongo;
     private MongoUtil mongoUtil;
+    private PermissionDatabase permissionDatabase;
+    private PermissionDispatcher permissionDispatcher;
 
     /**
      * This field will be used to choose between finding the player in the whole proxy
@@ -25,7 +34,6 @@ public class AccountSystem extends JavaPlugin {
      * with a BungeeCord then it's not necessary to chase him in the proxy because there isn't.
      * So anyway, in this case just use basic methods
      * @see MajorRankChangedListener
-     * @see Bukkit#getOnlinePlayers()
      */
     private boolean bungeeMode;
 
@@ -38,6 +46,10 @@ public class AccountSystem extends JavaPlugin {
 
         mongo = new Mongo(this);
         mongoUtil = new MongoUtil(this);
+        permissionDatabase = new PermissionDatabase(this);
+        permissionDispatcher = new PermissionDispatcher(this);
+
+        this.permissionDispatcher.onEnable();
 
         File spigotYml = new File("../../../" + getDataFolder(), "spigot.yml");
         YamlConfiguration yml = YamlConfiguration.loadConfiguration(spigotYml);
@@ -55,6 +67,11 @@ public class AccountSystem extends JavaPlugin {
         registerEvents();
         getCommand("rank").setExecutor(new RankCommand(this));
         getCommand("account").setExecutor(new AccountCommand(this));
+        DefaultInferenceProvider.getGlobal().register(PermissionDatabase.Permission.class, new PermissionArgument());
+        DefaultInferenceProvider.getGlobal().register(boolean.class, new BooleanArgument());
+
+        new CommandBuilder().infer(new PermissionCommand(this)).build(new ReflectionCommandCallback(new PermissionCommand(this)), getCommand("permission"));
+        new CommandBuilder().infer(new SetDefaultCommand(this)).build(new ReflectionCommandCallback(new SetDefaultCommand(this)), getCommand("setdefault"));
 
         getServer().getServicesManager().register(AccountSystem.class, this, this, ServicePriority.Normal);
         getLogger().info("Enabled!");
@@ -97,6 +114,14 @@ public class AccountSystem extends JavaPlugin {
      */
     public MongoUtil getMongoUtil() {
         return mongoUtil;
+    }
+
+    public PermissionDatabase getPermissionDatabase() {
+        return permissionDatabase;
+    }
+
+    public PermissionDispatcher getPermissionDispatcher() {
+        return permissionDispatcher;
     }
 
     /**
