@@ -19,10 +19,11 @@ repositories {
     maven {
         url "https://repo.codemc.org/repository/maven-public/"
     }
+    maven { url "https://papermc.io/repo/repository/maven-public/" }
 }
 
 dependencies {
-    shadow "org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT"
+    shadow "io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT"
     implementation "io.github.llewvallis:command-builder:2.2.0"
     implementation "io.github.leonardosnt:bungeechannelapi:1.0.0-SNAPSHOT"
     implementation 'org.mongodb:mongodb-driver:3.12.10'
