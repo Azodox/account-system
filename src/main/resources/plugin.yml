@@ -1,5 +1,6 @@
 name: AccountSystem
 version: @version@
+api-version: 1.18
 authors:
   - Azodox_
   - Virtual
