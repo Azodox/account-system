@@ -24,7 +24,7 @@ public class PermissionCommand {
     }
 
     @ExecuteCommand
-    public void permission(CommandContext ctx, @StringSetArgument.Arg({"add", "remove", "show", "reload", "except", "unexcept", "default", "undefault"}) String operation, String targetInput, @OptionalArg PermissionDatabase.Permission permission) {
+    public void permission(CommandContext ctx, @StringSetArgument.Arg({"add", "remove", "show", "reload", "except", "unexcept"}) String operation, String targetInput, @OptionalArg PermissionDatabase.Permission permission) {
         var target = PermissionDatabase.DatabaseParser.parse(targetInput);
         if(target == null){
             ctx.getSender().sendMessage("Invalid target");
