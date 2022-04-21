@@ -100,6 +100,9 @@ public class AccountManager {
                 .append("xp", 0.0d)
                 .append("level", 0.0d)
                 .append("money", 0.0d)
+                .append("points", 0.0d)
+                .append("farming-points", 0.0d)
+                .append("farming-prestige", 0.0d)
                 .append("first-connection", null)
                 .append("last-connection", null)
                 .append("last-disconnection", null)
@@ -150,97 +153,6 @@ public class AccountManager {
 
         }
         return null;
-    }
-
-    public double getXp(){
-        if(!hasAnAccount()){
-            return 0.0d;
-        }
-
-        return getAccount().getDouble("xp");
-    }
-
-    public void setXp(double xp){
-        if(!hasAnAccount()){
-            return;
-        }
-
-        final Document doc = getAccount();
-        doc.replace("xp", xp);
-        update(doc);
-    }
-
-    public double getLevel(){
-        if(!hasAnAccount()){
-            return 0.0d;
-        }
-
-        return getAccount().getDouble("level");
-    }
-
-    public void setLevel(double level){
-        if(!hasAnAccount()){
-            return;
-        }
-
-        final Document doc = getAccount();
-        doc.replace("level", level);
-        update(doc);
-    }
-
-    public long getFirstConnection(){
-        return getAccount().getLong("first-connection");
-    }
-
-    public void setFirstConnection(long firstConnection){
-        if(!hasAnAccount()) return;
-        final Document doc = getAccount();
-        doc.replace("first-connection", firstConnection);
-        update(doc);
-    }
-
-    public long getLastConnection(){
-        return getAccount().getLong("last-connection");
-    }
-
-    public void setLastConnection(long lastConnection){
-        if(!hasAnAccount()) return;
-        final Document doc = getAccount();
-        doc.replace("last-connection", lastConnection);
-        update(doc);
-    }
-
-    public long getLastDisconnection(){
-        return getAccount().getLong("last-disconnection");
-    }
-
-    public void setLastDisconnection(long lastDisconnection){
-        if(!hasAnAccount()) return;
-        final Document doc = getAccount();
-        doc.replace("last-disconnection", lastDisconnection);
-        update(doc);
-    }
-
-    public String getLastIp(){
-        return getAccount().getString("last-ip");
-    }
-
-    public void setLastIp(String lastIp){
-        if(!hasAnAccount()) return;
-        final Document doc = getAccount();
-        doc.replace("last-ip", lastIp);
-        update(doc);
-    }
-
-    public boolean getModerationMod(){
-        return getAccount().getBoolean("moderation-mod");
-    }
-
-    public void setModerationMod(boolean moderationMod){
-        if(!hasAnAccount()) return;
-        final Document doc = getAccount();
-        doc.replace("moderation-mod", moderationMod);
-        update(doc);
     }
 
     private MongoCollection<Document> getAccountCollection(){
