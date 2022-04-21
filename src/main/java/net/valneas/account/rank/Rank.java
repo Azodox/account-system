@@ -69,8 +69,6 @@ public class Rank {
         accountManager.update(doc);
 
         if(event) {
-            System.out.println("AccountManager : " + accountManager);
-            System.out.println("Rank : " + rank);
             Bukkit.getPluginManager().callEvent(new RankAddedEvent(accountManager, rank, sender));
         }
     }
