@@ -8,7 +8,11 @@ My original account system to manage accounts on a minecraft server.
 **PS :** Pour récupérer une instance de la classe `AccountSystem` il suffit de faire ceci :
 
 ```java
-final AccountSystem accountSystem = (AccountSystem) Bukkit.getPluginManager().getPlugin("AccountSystem");
+var provider = Bukkit.getServicesManager().getRegistration(AccountSystem.class);
+if(provider != null){
+    var accountSystem = provider.getProvider();
+    //CODE HERE
+}
 ```
 
 ---
