@@ -143,6 +143,19 @@ public class AccountManager {
         update(account);
     }
 
+    public Object get(String key){
+        if(!hasAnAccount()) return null;
+        return getAccount().get(key);
+    }
+
+    public void set(String key, Object value){
+        if(!hasAnAccount()) return;
+        Document account = getAccount();
+
+        account.replace(key, value);
+        update(account);
+    }
+
     public Document getAccount(){
         final MongoCollection<Document> accounts = getAccountCollection();
 
