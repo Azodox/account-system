@@ -22,8 +22,8 @@ public class PlayerQuitListener implements Listener {
         AccountManager accountManager = new AccountManager(main, player);
 
         if(accountManager.hasAnAccount()){
-            accountManager.setLastDisconnection(System.currentTimeMillis());
-            accountManager.setLastIp(PlayerUtil.getIp(player));
+            accountManager.set("last-disconnection", System.currentTimeMillis());
+            accountManager.set("last-ip", PlayerUtil.getIp(player));
         }
     }
 }

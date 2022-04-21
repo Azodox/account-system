@@ -26,13 +26,13 @@ public class PlayerJoinListener implements Listener {
 
         if(!accountManager.hasAnAccount()){
             accountManager.createAccount();
-            accountManager.setFirstConnection(current);
+            accountManager.set("first-connection", current);
         }else{
             accountManager.updateOnLogin();
         }
 
-        accountManager.setLastConnection(current);
-        accountManager.setLastIp(PlayerUtil.getIp(player));
+        accountManager.set("last-connection", current);
+        accountManager.set("last-ip", PlayerUtil.getIp(player));
         this.main.getPermissionDispatcher().set(player);
     }
 }
