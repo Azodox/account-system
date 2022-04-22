@@ -31,6 +31,12 @@ ou :
 final AccountManager accountManager = new AccountManager(*instance de AccountSystem*, *le nom du joueur (String)*, *l'uuid du joueur (String)*);
 ```
 
+Si vous souhaitez récupérer la valeur d'un des champs d'un compte, vous pouvez utiliser la méthode `get(String)`. Celle-ci prend en paramètre un String qui représente la clé, soit le nom du champ recherché, puis retourne un Object représentant la valeur du champ. Cet object peut être casté, cependant, il est recommandé de prioriser la méthode `getAccount#get(+ type de l'objet (ex: Boolean))` afin de ne pas avoir à caster la valeur retournée.\
+![](https://i.imgur.com/ScdTX8Q.png)
+
+Par contre, si vous souhaitez changer la valeur d'un des champs d'un compte, une seule méthode existe pour rendre la chose générique : `set(String, Object)`, prenant en paramètre le nom de champ et la nouvelle valeur.\
+![](https://i.imgur.com/CjwUVUh.png)
+
 ### Gérer les rangs d'un joueur
 
 Pour gérer les d'un joueur il vous faut récupérer une instance de la classe `Rank` pour ceci rien de plus simple, il vous faut au préalable une instance de la classe `AccountSystem` de disponible.
