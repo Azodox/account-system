@@ -13,7 +13,7 @@ public enum RankUnit {
 
     ADMIN(1, 1, "Admin", Component.text("\u2730 ").color(TextColor.fromHexString("#FDF617")).append(Component.text("Admin ").color(NamedTextColor.DARK_RED)), Component.empty(), NamedTextColor.DARK_RED),
     HEAD(2, 2, "Head", Component.text("Head-"), Component.empty(), NamedTextColor.WHITE),
-    DEVELOPPEUR(3, 3, "Développeur", Component.text("Développeur ").color(NamedTextColor.RED).decorate(TextDecoration.ITALIC).append(Component.space()), Component.empty(), NamedTextColor.RED),
+    DEVELOPPEUR(3, 3, "Développeur", Component.text("Développeur").color(NamedTextColor.RED).decorate(TextDecoration.ITALIC).append(Component.space()), Component.empty(), NamedTextColor.RED),
     DEVELOPPEUSE(4, 4, "Développeuse", Component.text("Développeuse").color(NamedTextColor.RED).decorate(TextDecoration.ITALIC).append(Component.space()), Component.empty(), NamedTextColor.RED),
     BUILDER(5, 5, "Builder", Component.text("Builder").color(NamedTextColor.AQUA).append(Component.space()), Component.empty(), NamedTextColor.AQUA),
     BUILDEUSE(6, 6, "Buildeuse", Component.text("Buildeuse").color(NamedTextColor.AQUA).append(Component.space()), Component.empty(), NamedTextColor.AQUA),
