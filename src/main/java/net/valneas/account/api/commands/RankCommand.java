@@ -1,5 +1,9 @@
 package net.valneas.account.api.commands;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.valneas.account.AccountManager;
 import net.valneas.account.AccountSystem;
 import net.valneas.account.rank.Rank;
@@ -10,8 +14,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import java.util.List;
 
 /**
  * The rank command class.
@@ -184,7 +186,7 @@ public class RankCommand implements CommandExecutor {
                          */
                         final RankUnit rankUnit = RankUnit.getByCommandArg(args[2]);
                         if (rankUnit == null) {
-                            sender.sendMessage("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n" + RankUnit.getRankList());
+                            sender.sendMessage(Component.text("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n").append(RankUnit.getRankList()));
                             return true;
                         }
 
@@ -255,7 +257,7 @@ public class RankCommand implements CommandExecutor {
 
                         final RankUnit rankUnit = RankUnit.getByCommandArg(args[2]);
                         if (rankUnit == null) {
-                            sender.sendMessage("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n" + RankUnit.getRankList());
+                            sender.sendMessage(Component.text("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n").append(RankUnit.getRankList()));
                             return true;
                         }
 
@@ -306,7 +308,7 @@ public class RankCommand implements CommandExecutor {
 
                         final RankUnit rankUnit = RankUnit.getByCommandArg(args[2]);
                         if (rankUnit == null) {
-                            sender.sendMessage("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n" + RankUnit.getRankList());
+                            sender.sendMessage(Component.text("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n").append(RankUnit.getRankList()));
                             return true;
                         }
 
@@ -341,9 +343,9 @@ public class RankCommand implements CommandExecutor {
             }
 
             sender.sendMessage(
-                    ChatColor.DARK_GRAY + "" + ChatColor.STRIKETHROUGH + "----------------------------------------------\n" +
-                    RankUnit.getRankList() + "\n" +
-                    ChatColor.DARK_GRAY + "" + ChatColor.STRIKETHROUGH + "----------------------------------------------");
+                    Component.text("                                                \n").color(NamedTextColor.DARK_GRAY).decorate(TextDecoration.STRIKETHROUGH)
+                            .append(RankUnit.getRankList()).style(Style.empty())
+                            .append(Component.text("\n                                                ").color(NamedTextColor.DARK_GRAY).decorate(TextDecoration.STRIKETHROUGH)));
         }
 
         return false;
