@@ -14,13 +14,11 @@ public enum RankUnit {
 
     ADMIN(1, 1, "Admin", Component.text("\u2730 ").color(TextColor.fromHexString("#FDF617")).append(Component.text("Admin ").color(NamedTextColor.DARK_RED)), Component.empty(), NamedTextColor.DARK_RED),
     HEAD(2, 2, "Head", Component.text("Head-"), Component.empty(), NamedTextColor.WHITE),
-    DEVELOPPEUR(3, 3, "Développement", Component.text("Développement").color(NamedTextColor.RED).decorate(TextDecoration.ITALIC).append(Component.space()), Component.empty(), NamedTextColor.RED),
-    BUILDER(4, 5, "Build", Component.text("Build").color(NamedTextColor.AQUA).append(Component.space()), Component.empty(), NamedTextColor.AQUA),
-    MODERATEUR(5, 7, "Modération", Component.text("Modération").color(NamedTextColor.DARK_GREEN).append(Component.space()), Component.empty(), NamedTextColor.DARK_GREEN),
-    ASSISTANT(6, 9, "Aide", Component.text("Aide").color(NamedTextColor.GREEN).append(Component.space()), Component.empty(), NamedTextColor.GREEN),
-    STAFF(7, 15, "Staff", Component.text("\u2726 Staff").color(NamedTextColor.LIGHT_PURPLE).decorate(TextDecoration.ITALIC).append(Component.space()), Component.empty(), NamedTextColor.LIGHT_PURPLE),
-    PARTENAIRE(8, 11, "Partenaire", Component.text("Partenaire").color(NamedTextColor.GOLD).append(Component.space()), Component.empty(), NamedTextColor.GOLD),
-    JOUEUR(9, 14, "Joueur", Component.text("").color(NamedTextColor.GRAY), Component.empty(), NamedTextColor.GRAY);
+    DEVELOPPEMENT(3, 3, "Développement", Component.text("Développement").color(NamedTextColor.RED).decorate(TextDecoration.ITALIC).append(Component.space()), Component.empty(), NamedTextColor.RED),
+    MODERATION(4, 7, "Modération", Component.text("Modération").color(NamedTextColor.DARK_GREEN).append(Component.space()), Component.empty(), NamedTextColor.DARK_GREEN),
+    STAFF(5, 15, "Equipe", Component.text("\u2726 Équipe").color(NamedTextColor.LIGHT_PURPLE).decorate(TextDecoration.ITALIC).append(Component.space()), Component.empty(), NamedTextColor.LIGHT_PURPLE),
+    PARTENAIRE(6, 11, "Partenaire", Component.text("Partenaire").color(NamedTextColor.GOLD).append(Component.space()), Component.empty(), NamedTextColor.GOLD),
+    JOUEUR(7, 14, "Joueur", Component.text("").color(NamedTextColor.GRAY), Component.empty(), NamedTextColor.GRAY);
 
     private final String name;
     private final Component prefix, suffix;
