@@ -147,13 +147,13 @@ public class AccountCommand implements CommandExecutor {
                                 message.setColor(net.md_5.bungee.api.ChatColor.BLUE);
 
                                 for (Document document : accounts.find()) {
-                                    i++;
                                     if(i < limit){
                                        TextComponent msg = new TextComponent(ChatColor.DARK_GRAY + "- " + ChatColor.GRAY + "" + ChatColor.BOLD + document.getString("name") + "\n");
                                        msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.AQUA + "Cliquez pour en voir plus.").create()));
                                        msg.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/account show " + document.getObjectId("_id")));
                                        message.addExtra(msg);
                                     }
+                                    i++;
                                 }
 
                                 message.addExtra("\n" + ChatColor.GRAY + "" + i + " compte(s) affiché(s).");
