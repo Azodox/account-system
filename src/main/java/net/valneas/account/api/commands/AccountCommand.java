@@ -137,7 +137,7 @@ public class AccountCommand implements CommandExecutor {
                                 long limit = 0;
 
                                 try{
-                                    limit = args[2].equalsIgnoreCase("max") ? accounts.countDocuments() : Long.parseLong(args[2]);
+                                    limit = args[2].equalsIgnoreCase("max") ? accounts.countDocuments() + 1 : Long.parseLong(args[2]) + 1;
                                 } catch (Exception e){
                                     player.sendMessage(ChatColor.RED + "Erreur : La limite demandée n'est pas un nombre.");
                                     return true;
@@ -147,13 +147,13 @@ public class AccountCommand implements CommandExecutor {
                                 message.setColor(net.md_5.bungee.api.ChatColor.BLUE);
 
                                 for (Document document : accounts.find()) {
-                                    i++;
                                     if(i < limit){
                                        TextComponent msg = new TextComponent(ChatColor.DARK_GRAY + "- " + ChatColor.GRAY + "" + ChatColor.BOLD + document.getString("name") + "\n");
                                        msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.AQUA + "Cliquez pour en voir plus.").create()));
                                        msg.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/account show " + document.getObjectId("_id")));
                                        message.addExtra(msg);
                                     }
+                                    i++;
                                 }
 
                                 message.addExtra("\n" + ChatColor.GRAY + "" + i + " compte(s) affiché(s).");
