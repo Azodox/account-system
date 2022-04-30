@@ -137,7 +137,7 @@ public class AccountCommand implements CommandExecutor {
                                 long limit = 0;
 
                                 try{
-                                    limit = args[2].equalsIgnoreCase("max") ? accounts.countDocuments() + 1 : Long.parseLong(args[2]) + 1;
+                                    limit = args[2].equalsIgnoreCase("max") ? accounts.countDocuments() : Long.parseLong(args[2]);
                                 } catch (Exception e){
                                     player.sendMessage(ChatColor.RED + "Erreur : La limite demandée n'est pas un nombre.");
                                     return true;
