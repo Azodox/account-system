@@ -1,4 +1,4 @@
-package net.valneas.account.api.commands.arguments;
+package net.valneas.account.commands.arguments;
 
 import io.github.llewvallis.commandbuilder.ArgumentParseException;
 import io.github.llewvallis.commandbuilder.ArgumentParser;

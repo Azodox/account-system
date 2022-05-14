@@ -1,4 +1,4 @@
-package net.valneas.account.api.commands;
+package net.valneas.account.commands;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

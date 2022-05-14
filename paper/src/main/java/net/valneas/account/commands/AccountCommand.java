@@ -1,4 +1,4 @@
-package net.valneas.account.api.commands;
+package net.valneas.account.commands;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;

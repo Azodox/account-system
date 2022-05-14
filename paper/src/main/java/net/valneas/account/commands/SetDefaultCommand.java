@@ -1,4 +1,4 @@
-package net.valneas.account.api.commands;
+package net.valneas.account.commands;
 
 import io.github.llewvallis.commandbuilder.CommandContext;
 import io.github.llewvallis.commandbuilder.ExecuteCommand;
