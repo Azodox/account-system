@@ -1,7 +1,7 @@
-package net.valneas.account.api.events.rank;
+package net.valneas.account.events.rank;
 
-import net.valneas.account.AccountManager;
-import net.valneas.account.api.events.AccountEvent;
+import net.valneas.account.AbstractAccountManager;
+import net.valneas.account.events.AccountEvent;
 import net.valneas.account.rank.RankUnit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
@@ -12,7 +12,7 @@ public class RankRemovedEvent extends AccountEvent {
     private final RankUnit rankRemoved;
     private final CommandSender sender;
 
-    public RankRemovedEvent(AccountManager account, RankUnit rankRemoved, CommandSender sender) {
+    public RankRemovedEvent(AbstractAccountManager account, RankUnit rankRemoved, CommandSender sender) {
         super(account);
         this.rankRemoved = rankRemoved;
         this.sender = sender;
