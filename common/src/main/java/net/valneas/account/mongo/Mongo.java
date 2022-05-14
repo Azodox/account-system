@@ -1,17 +1,21 @@
 package net.valneas.account.mongo;
 
 import com.mongodb.*;
-import net.valneas.account.AccountSystem;
+
+/**
+ * @author Azodox_ (Luke)
+ * 14/5/2022.
+ */
 
 public class Mongo {
 
     private final MongoClient mongoClient;
 
-    public Mongo(AccountSystem main) {
+    public Mongo(String username, String authDatabase, String password, String host, int port) {
         MongoCredential credential = MongoCredential.createCredential(
-                main.getConfig().getString("mongodb.username"),
-                main.getConfig().getString("mongodb.authDatabase"),
-                main.getConfig().getString("mongodb.password").toCharArray()
+                username,
+                authDatabase,
+                password.toCharArray()
         );
 
         MongoClientOptions options = MongoClientOptions.builder()
@@ -25,8 +29,8 @@ public class Mongo {
 
         this.mongoClient = new MongoClient(
                 new ServerAddress(
-                        main.getConfig().getString("mongodb.host"),
-                        main.getConfig().getInt("mongodb.port")),
+                        host,
+                        port),
                 credential, options
         );
     }
