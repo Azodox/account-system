@@ -1,9 +1,9 @@
 package net.valneas.account.rank;
 
-import net.valneas.account.AccountManager;
-import net.valneas.account.api.events.rank.MajorRankChangedEvent;
-import net.valneas.account.api.events.rank.RankAddedEvent;
-import net.valneas.account.api.events.rank.RankRemovedEvent;
+import net.valneas.account.AbstractAccountManager;
+import net.valneas.account.events.rank.MajorRankChangedEvent;
+import net.valneas.account.events.rank.RankAddedEvent;
+import net.valneas.account.events.rank.RankRemovedEvent;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -14,9 +14,9 @@ import java.util.List;
 
 public class Rank {
 
-    private final AccountManager accountManager;
+    private final AbstractAccountManager accountManager;
 
-    public Rank(AccountManager accountManager) {
+    public Rank(AbstractAccountManager accountManager) {
         this.accountManager = accountManager;
     }
 
