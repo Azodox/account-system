@@ -3,12 +3,12 @@ package net.valneas.account;
 import io.github.llewvallis.commandbuilder.CommandBuilder;
 import io.github.llewvallis.commandbuilder.DefaultInferenceProvider;
 import io.github.llewvallis.commandbuilder.ReflectionCommandCallback;
-import net.valneas.account.api.commands.AccountCommand;
-import net.valneas.account.api.commands.PermissionCommand;
-import net.valneas.account.api.commands.RankCommand;
-import net.valneas.account.api.commands.SetDefaultCommand;
-import net.valneas.account.api.commands.arguments.BooleanArgument;
-import net.valneas.account.api.commands.arguments.PermissionArgument;
+import net.valneas.account.commands.AccountCommand;
+import net.valneas.account.commands.PermissionCommand;
+import net.valneas.account.commands.RankCommand;
+import net.valneas.account.commands.SetDefaultCommand;
+import net.valneas.account.commands.arguments.BooleanArgument;
+import net.valneas.account.commands.arguments.PermissionArgument;
 import net.valneas.account.listener.*;
 import net.valneas.account.mongo.Mongo;
 import net.valneas.account.permission.PermissionDatabase;
@@ -44,7 +44,12 @@ public class AccountSystem extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
 
-        mongo = new Mongo(this);
+        mongo = new Mongo(
+                getConfig().getString("mongodb.username"),
+                getConfig().getString("mongodb.authDatabase"),
+                getConfig().getString("mongodb.password"),
+                getConfig().getString("mongodb.host"),
+                getConfig().getInt("mongodb.port"));
         mongoUtil = new MongoUtil(this);
         permissionDatabase = new PermissionDatabase(this);
         permissionDispatcher = new PermissionDispatcher(this);
