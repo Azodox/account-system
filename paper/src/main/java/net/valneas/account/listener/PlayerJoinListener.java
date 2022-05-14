@@ -9,6 +9,11 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
+/**
+ * @author Azodox_ (Luke)
+ * 15/5/2022.
+ */
+
 public class PlayerJoinListener implements Listener {
 
     private final AccountSystem main;
@@ -20,12 +25,12 @@ public class PlayerJoinListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onJoin(PlayerJoinEvent e){
         Player player = e.getPlayer();
-        AccountManager accountManager = new AccountManager(main, player);
+        var accountManager = new AccountManager(main, player);
 
         long current = System.currentTimeMillis();
 
         if(!accountManager.hasAnAccount()){
-            accountManager.createAccount();
+            accountManager.initDefaultAccount();
             accountManager.set("first-connection", current);
         }else{
             accountManager.updateOnLogin();

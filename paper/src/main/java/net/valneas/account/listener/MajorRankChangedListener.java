@@ -1,9 +1,8 @@
 package net.valneas.account.listener;
 
 import io.github.leonardosnt.bungeechannelapi.BungeeChannelApi;
-import net.valneas.account.AccountManager;
 import net.valneas.account.AccountSystem;
-import net.valneas.account.api.events.rank.MajorRankChangedEvent;
+import net.valneas.account.events.rank.MajorRankChangedEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -20,7 +19,7 @@ public class MajorRankChangedListener implements Listener {
 
     @EventHandler
     public void onMajorRankChanged(MajorRankChangedEvent e){
-        final AccountManager account = e.getAccount();
+        final var account = e.getAccount();
 
         String message = ChatColor.YELLOW + "" + ChatColor.ITALIC + "Michel §r§l➔ " + ChatColor.YELLOW +
                 "Hey, on m'a dit de te dire que ton rang majeur a changé. Donc tu passes du rang §r" + ChatColor.BOLD + e.getPreviousMajorRank().getName() +
