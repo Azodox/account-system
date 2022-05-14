@@ -1,0 +1,58 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+plugins {
+    id 'java'
+    id 'idea'
+    id 'com.github.johnrengelman.shadow'
+    id 'maven-publish'
+    id 'net.kyori.blossom' version '1.2.0'
+}
+
+def pluginName = parent.name.toLowerCase() + '-velocity'
+group parent.group
+version parent.version
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://nexus.velocitypowered.com/repository/maven-public/'
+    }
+}
+
+blossom {
+    replaceTokenIn('src/main/java/net/valneas/account/VelocityAccountSystem.java')
+    replaceTokenIn('src/main/resources/velocity-plugin.json')
+    replaceToken '@version@', version
+    replaceToken '@id@', pluginName
+    replaceToken '@name@', pluginName
+}
+
+dependencies {
+    shadow 'com.velocitypowered:velocity-api:3.1.0'
+    implementation 'net.kyori:adventure-text-minimessage:4.10.1'
+    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'org.tomlj:tomlj:1.0.0'
+    implementation project(":common")
+    implementation parent
+}
+
+shadowJar {
+    archivesBaseName = parent.name + '-velocity'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication){
+            groupId = group
+            version = version
+            artifactId = pluginName
+        }
+    }
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        filter ReplaceTokens, tokens: [version: version, id: pluginName, name: pluginName]
+    }
+    duplicatesStrategy = 'include'
+}

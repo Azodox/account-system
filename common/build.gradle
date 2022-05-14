@@ -1,0 +1,17 @@
+plugins {
+    id 'java'
+}
+
+group parent.group
+version parent.version
+
+compileJava.options.encoding = 'UTF-8'
+sourceCompatibility = targetCompatibility = 17
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation parent
+}
