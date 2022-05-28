@@ -1,4 +1,4 @@
-# account-system (v0.3.3)
+# account-system (v0.4.0)
 My original account system to manage accounts on a minecraft server.
 
 ## Développeurs
