@@ -7,6 +7,7 @@ plugins {
 }
 
 def pluginName = parent.name.toLowerCase() + '-paper'
+ext.set("pluginName", pluginName)
 group parent.group
 version parent.version
 
@@ -25,14 +26,10 @@ repositories {
 
 dependencies {
     shadow 'io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT'
-    shadow parent
+    implementation parent
     implementation 'io.github.llewvallis:command-builder:2.2.0'
     implementation "io.github.leonardosnt:bungeechannelapi:1.0.0-SNAPSHOT"
     implementation project(":common")
-}
-
-shadowJar {
-    archivesBaseName = pluginName
 }
 
 processResources {
@@ -41,3 +38,4 @@ processResources {
     }
     duplicatesStrategy = 'include'
 }
+
