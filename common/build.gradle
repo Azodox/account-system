@@ -2,6 +2,8 @@ plugins {
     id 'java'
 }
 
+def pluginName = parent.name.toLowerCase() + '-common'
+ext.set("pluginName", pluginName)
 group parent.group
 version parent.version
 
