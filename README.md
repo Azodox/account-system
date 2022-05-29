@@ -3,6 +3,31 @@ My original account system to manage accounts on a minecraft server.
 
 ## Développeurs
 
+### Ajout dans votre projet
+
+Maven :
+```xml
+<dependencies>
+<!-- AccountSystem for Paper (if you wish to use another one simply replace "paper" by something else (e.g. velocity)) -->
+    <dependency>
+        <groupId>io.github.azodox</groupId>
+        <artifactId>accountsystem-paper</artifactId>
+        <version>0.4.0</version>
+        <!-- Classifier is important, don't remove it or will not be able to import the AccountSystem -->
+        <classifier>all</classifier>
+    </dependency>
+</dependencies>
+```
+Gradle :
+```groovy
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    shadow 'io.github.azodox:accountsystem-paper:0.4.0:all'
+}
+```
 ---
 
 **PS :** Pour récupérer une instance de la classe `AccountSystem` il suffit de faire ceci :
