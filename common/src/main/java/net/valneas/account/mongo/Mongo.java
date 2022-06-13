@@ -1,6 +1,15 @@
 package net.valneas.account.mongo;
 
-import com.mongodb.*;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
+import com.mongodb.WriteConcern;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.connection.ClusterConnectionMode;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Azodox_ (Luke)
@@ -18,21 +27,26 @@ public class Mongo {
                 password.toCharArray()
         );
 
-        MongoClientOptions options = MongoClientOptions.builder()
-                .connectionsPerHost(10)
-                .connectTimeout(100000)
-                .maxWaitTime(100000)
-                .socketTimeout(1000)
-                .heartbeatConnectTimeout(600000)
+        MongoClientSettings options = MongoClientSettings.builder()
+                .applyToClusterSettings(builder -> {
+                    builder.hosts(List.of(new ServerAddress(host, port)));
+                    builder.mode(ClusterConnectionMode.MULTIPLE);
+                    builder.serverSelectionTimeout(10, TimeUnit.SECONDS);
+                })
+                .applyToConnectionPoolSettings(builder ->{
+                    builder.maxWaitTime(30, TimeUnit.SECONDS);
+                    builder.maxConnectionLifeTime(2, TimeUnit.HOURS);
+                    builder.maxConnectionIdleTime(30, TimeUnit.MINUTES);
+                })
+                .applyToSocketSettings(builder -> {
+                    builder.connectTimeout(10, TimeUnit.SECONDS);
+                    builder.readTimeout(30, TimeUnit.SECONDS);
+                })
                 .writeConcern(WriteConcern.ACKNOWLEDGED)
+                .credential(credential)
         .build();
 
-        this.mongoClient = new MongoClient(
-                new ServerAddress(
-                        host,
-                        port),
-                credential, options
-        );
+        this.mongoClient = MongoClients.create(options);
     }
 
     public MongoClient getMongoClient() {
