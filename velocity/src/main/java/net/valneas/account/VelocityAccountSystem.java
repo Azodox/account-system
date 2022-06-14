@@ -4,6 +4,8 @@ import com.google.inject.Inject;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import dev.morphia.Datastore;
+import lombok.Getter;
 import net.valneas.account.mongo.Mongo;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -24,6 +26,7 @@ public class VelocityAccountSystem {
     private final Logger logger;
     private final Path dataDirectory;
     private final Mongo mongo;
+    private final @Getter Datastore datastore;
     private TomlParseResult config;
 
     @Inject
@@ -44,6 +47,7 @@ public class VelocityAccountSystem {
                 getConfig().getString("MongoDB.password"),
                 getConfig().getString("MongoDB.host"),
                 getConfig().getLong("MongoDB.port").intValue());
+        this.datastore = new MorphiaInitializer(this.getClass(), this.mongo.getMongoClient(), getConfig().getString("MongoDB.database"), new String[]{"net.valneas.account"}).getDatastore();
 
         logger.info("Account System plugin for Velocity successfully loaded. v@version@");
     }
