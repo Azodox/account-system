@@ -1,5 +1,6 @@
 package net.valneas.account.listener;
 
+import dev.morphia.query.experimental.updates.UpdateOperators;
 import net.valneas.account.AccountManager;
 import net.valneas.account.AccountSystem;
 import net.valneas.account.util.PlayerUtil;
@@ -31,13 +32,13 @@ public class PlayerJoinListener implements Listener {
 
         if(!accountManager.hasAnAccount()){
             accountManager.initDefaultAccount();
-            accountManager.set("first-connection", current);
+            accountManager.getAccountQuery().update(UpdateOperators.set("first-connection", current)).execute();
         }else{
             accountManager.updateOnLogin();
         }
 
-        accountManager.set("last-connection", current);
-        accountManager.set("last-ip", PlayerUtil.getIp(player));
+        accountManager.getAccountQuery().update(UpdateOperators.set("last-connection", current)).execute();
+        accountManager.getAccountQuery().update(UpdateOperators.set("last-ip", PlayerUtil.getIp(player))).execute();
         this.main.getPermissionDispatcher().set(player);
     }
 }

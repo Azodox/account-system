@@ -1,105 +1,46 @@
 package net.valneas.account;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import org.bson.Document;
-
-import java.util.ArrayList;
+import com.google.common.base.Preconditions;
+import dev.morphia.Datastore;
+import dev.morphia.query.Query;
+import dev.morphia.query.experimental.filters.Filters;
+import dev.morphia.query.experimental.updates.UpdateOperators;
 
 public abstract class AbstractAccountManager {
 
-    protected final MongoClient mongo;
+    protected final Datastore datastore;
     private final String name, uuid;
 
-    public AbstractAccountManager( MongoClient mongo, String name, String uuid) {
-        this.mongo = mongo;
+    public AbstractAccountManager(Datastore datastore, String name, String uuid) {
+        this.datastore = datastore;
         this.name = name;
         this.uuid = uuid;
     }
 
-    public void createAccount(int defaultRank){
-        if(hasAnAccount()) return;
-        final MongoCollection<Document> accounts = getAccountCollection();
-
-        Document account = new Document("name", name)
-                .append("uuid", uuid)
-                .append("xp", 0.0d)
-                .append("level", 0.0d)
-                .append("money", 0.0d)
-                .append("points", 0.0d)
-                .append("farming-points", 0.0d)
-                .append("farming-prestige", 0.0d)
-                .append("first-connection", null)
-                .append("last-connection", null)
-                .append("last-disconnection", null)
-                .append("last-ip", null)
-                .append("major-rank", defaultRank)
-                .append("ranks", new ArrayList<Integer>())
-                .append("moderation-mod", null)
-        ;
-        accounts.insertOne(account);
-    }
+    public abstract void createAccount(int defaultRankId);
 
     public boolean hasAnAccount(){
-        final MongoCollection<Document> accounts = getAccountCollection();
-
-        for (Document document : accounts.find()) {
-            if(document.getString("uuid").equals(uuid)){
-                return true;
-            }
-
-        }
-        return false;
-    }
-
-    public void update(Document newDocument){
-        if(!hasAnAccount()) return;
-        Document account = getAccount();
-        getAccountCollection().findOneAndReplace(account, newDocument);
+        return this.datastore.find(Account.class).filter(Filters.eq("uuid", uuid)).count() != 0;
     }
 
     public void updateOnLogin(){
         if(!hasAnAccount()) return;
-        Document account = getAccount();
+        var query = getAccountQuery();
+        net.valneas.account.Account account = query.first();
 
-        if(!account.getString("name").equals(name)){
-            account.replace("name", name);
-        }
+        Preconditions.checkNotNull(account, "Account not found");
 
-        update(account);
+        if(!account.getName().equals(name))
+            query.update(UpdateOperators.set("name", name)).execute();
     }
 
-    public Object get(String key){
-        if(!hasAnAccount()) return null;
-        return getAccount().get(key);
+    public Query<Account> getAccountQuery(){
+        return this.datastore.find(Account.class).filter(Filters.eq("uuid", uuid));
     }
 
-    public void set(String key, Object value){
-        if(!hasAnAccount()) return;
-        Document account = getAccount();
-
-        account.replace(key, value);
-        update(account);
+    public Account getAccount(){
+        return getAccountQuery().first();
     }
-
-    public Document getAccount(){
-        final MongoCollection<Document> accounts = getAccountCollection();
-
-        for (Document document : accounts.find()) {
-            if(document.getString("uuid").equals(uuid)){
-                return document;
-            }
-
-        }
-        return null;
-    }
-
-    private MongoCollection<Document> getAccountCollection(){
-        return getDatabase().getCollection("accounts");
-    }
-
-    abstract protected MongoDatabase getDatabase();
 
     public String getName() {
         return name;

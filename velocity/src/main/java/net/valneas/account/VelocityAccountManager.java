@@ -1,24 +1,47 @@
 package net.valneas.account;
 
-import com.mongodb.client.MongoDatabase;
 import com.velocitypowered.api.proxy.Player;
+
+import java.util.ArrayList;
 
 /**
  * @author Azodox_ (Luke)
  * 14/5/2022.
  */
 
-public class VelocityAccountManager extends AbstractAccountManager{
+public class VelocityAccountManager extends AbstractAccountManager {
 
     private final VelocityAccountSystem plugin;
 
     public VelocityAccountManager(VelocityAccountSystem plugin, Player player) {
-        super(plugin.getMongo().getMongoClient(), player.getUsername(), player.getUniqueId().toString());
+        super(new MorphiaInitializer(plugin.getClass(), plugin.getMongo().getMongoClient(), plugin.getConfig().getString("MongoDB.database"), new String[]{"net.valneas.account"}).getDatastore(), player.getUsername(), player.getUniqueId().toString());
         this.plugin = plugin;
     }
 
     @Override
-    protected MongoDatabase getDatabase() {
-        return mongo.getDatabase(plugin.getConfig().getString("MongoDB.database"));
+    public void createAccount(int defaultRankId) {
+        if(hasAnAccount())
+            return;
+
+        var account = new Account(
+                this.getUuid(),
+                this.getName(),
+                "",
+                defaultRankId,
+                false,
+                0.0d,
+                0.0d,
+                0.0d,
+                0.0d,
+                0.0d,
+                0.0d,
+                new ArrayList<>(),
+                0L,
+                0L,
+                0L,
+                false
+        );
+
+        plugin.getDatastore().save(account);
     }
 }

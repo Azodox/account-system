@@ -1,5 +1,7 @@
 plugins {
     id 'java'
+    id 'idea'
+    id 'com.github.johnrengelman.shadow'
 }
 
 def pluginName = parent.name.toLowerCase() + '-common'

@@ -1,4 +1,4 @@
-# account-system (v0.4.0)
+# account-system (v0.5.0)
 My original account system to manage accounts on a minecraft server.
 
 ## Développeurs
@@ -12,7 +12,7 @@ Maven :
     <dependency>
         <groupId>io.github.azodox</groupId>
         <artifactId>accountsystem-paper</artifactId>
-        <version>0.4.0</version>
+        <version>0.5.0</version>
         <!-- Classifier is important, don't remove it or will not be able to import the AccountSystem -->
         <classifier>all</classifier>
     </dependency>
@@ -56,18 +56,14 @@ ou :
 final AccountManager accountManager = new AccountManager(*instance de AccountSystem*, *le nom du joueur (String)*, *l'uuid du joueur (String)*);
 ```
 
-Si vous souhaitez récupérer la valeur d'un des champs d'un compte, vous pouvez utiliser la méthode `get(String)`. Celle-ci prend en paramètre un String qui représente la clé, soit le nom du champ recherché, puis retourne un Object représentant la valeur du champ. Cet object peut être casté, cependant, il est recommandé de prioriser la méthode `getAccount#get(+ type de l'objet (ex: Boolean))` afin de ne pas avoir à caster la valeur retournée.\
-![](https://i.imgur.com/ScdTX8Q.png)
-
-Par contre, si vous souhaitez changer la valeur d'un des champs d'un compte, une seule méthode existe pour rendre la chose générique : `set(String, Object)`, prenant en paramètre le nom de champ et la nouvelle valeur.\
-![](https://i.imgur.com/CjwUVUh.png)
+Si vous souhaitez récupérer la valeur d'un des champs d'un compte, vous pouvez utiliser la méthode `get<field>()` (ex : `accountManager.getAccount().getName()`)
 
 ### Gérer les rangs d'un joueur
 
 Pour gérer les d'un joueur il vous faut récupérer une instance de la classe `Rank` pour ceci rien de plus simple, il vous faut au préalable une instance de la classe `AccountSystem` de disponible.
 
 ```java
-final Rank rank = account.newRankManager();
+final RankManager rank = account.newRankManager();
 ```
 
 **Attention : Cette méthode CREER une NOUVELLE instance de la classe Rank, vous n'obtiendrez donc pas la même instance à chaque fois que vous appelez cette méthode, c'est bien pour ça que le concept de variable a été inventé :smile:**
@@ -90,7 +86,7 @@ Il est a été ajouté à 2 utilisateurs jusqu'à présent.
 Pour vérifier si un joueur a cette autorisation :
 
 ```java
-if(accountManager.getAccount().containsKey("super-user") && accountManager.getAccount().getBoolean("super-user")){
+if(accountManager.getAccount().isSuperUser()){
   //CODE
 }
 ```
@@ -98,7 +94,7 @@ if(accountManager.getAccount().containsKey("super-user") && accountManager.getAc
 Et pour vérifier s'il ne l'a pas :
 
 ```java
-if(!accountManager.getAccount().containsKey("super-user") || !accountManager.getAccount().getBoolean("super-user")){
+if(!accountManager.getAccount().isSuperUser()){
   //CODE
 }
 ```

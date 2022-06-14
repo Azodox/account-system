@@ -6,7 +6,6 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.valneas.account.AccountManager;
 import net.valneas.account.AccountSystem;
-import net.valneas.account.rank.Rank;
 import net.valneas.account.rank.RankUnit;
 import net.valneas.account.util.PlayerUtil;
 import org.bukkit.ChatColor;
@@ -35,11 +34,10 @@ public class RankCommand implements CommandExecutor {
          * If the sender is a player, check if he has the permission
          * to execute this command.
          */
-        if(sender instanceof Player){
-            Player player = (Player) sender;
-            final AccountManager account = new AccountManager(main, player);
-            final Rank rank = account.newRankManager();
-            if(!account.getAccount().containsKey("super-user") || !account.getAccount().getBoolean("super-user")){
+        if(sender instanceof Player player){
+            final var account = new AccountManager(main, player);
+            final var rank = account.newRankManager();
+            if(!account.getAccount().isSuperUser()){
                 player.sendMessage(ChatColor.RED + "Erreur : Vous n'avez pas la permission.");
                 return true;
             }
@@ -92,7 +90,7 @@ public class RankCommand implements CommandExecutor {
                  * If account exists then show the ranks.
                  */
                 if (account.hasAnAccount()) {
-                    final Rank rank = account.newRankManager();
+                    final var rank = account.newRankManager();
 
                     /*
                      * If the player hasn't any rank.
@@ -122,7 +120,7 @@ public class RankCommand implements CommandExecutor {
                      * Add the ranks in the message builder.
                      */
                     if (rank.hasRanks()) {
-                        for (RankUnit r : rank.getRanks()) {
+                        for (RankUnit r : rank.getRanks().stream().map(r -> (RankUnit) r).toList()) {
                             sb.append("§f- " + ChatColor.GRAY + r.getName() + ChatColor.DARK_GRAY + " (" + ChatColor.GOLD + "Id §f: " + ChatColor.GOLD +
                                     r.getId() + ChatColor.DARK_GRAY + ")\n");
                         }
@@ -179,21 +177,21 @@ public class RankCommand implements CommandExecutor {
                      * If account exists then check and add the rank.
                      */
                     if (account.hasAnAccount()) {
-                        final Rank rank = account.newRankManager();
+                        final var rank = account.newRankManager();
 
                         /*
                          * If the rank is null.
                          */
-                        final RankUnit rankUnit = RankUnit.getByCommandArg(args[2]);
+                        final RankUnit rankUnit = (RankUnit) main.getRankHandler().getByCommandArg(args[2]).first();
                         if (rankUnit == null) {
-                            sender.sendMessage(Component.text("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n").append(RankUnit.getRankList()));
+                            sender.sendMessage(Component.text("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n").append(main.getRankHandler().getRankList()));
                             return true;
                         }
 
                         /*
                          * If the player has already the rank.
                          */
-                        if (rank.getMajorRank().equals(rankUnit) || rank.hasRank(rankUnit)) {
+                        if (rank.hasExactRank(rankUnit.getId())) {
                             sender.sendMessage(ChatColor.RED + "Erreur : Cette personne a déjà le rang.");
                             return true;
                         }
@@ -253,15 +251,15 @@ public class RankCommand implements CommandExecutor {
                     }
 
                     if (account.hasAnAccount()) {
-                        final Rank rank = account.newRankManager();
+                        final var rank = account.newRankManager();
 
-                        final RankUnit rankUnit = RankUnit.getByCommandArg(args[2]);
+                        final RankUnit rankUnit = (RankUnit) main.getRankHandler().getByCommandArg(args[2]);
                         if (rankUnit == null) {
-                            sender.sendMessage(Component.text("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n").append(RankUnit.getRankList()));
+                            sender.sendMessage(Component.text("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n").append(main.getRankHandler().getRankList()));
                             return true;
                         }
 
-                        if (!rank.hasMajorRank() || !rank.hasRanks() || !rank.hasRank(rankUnit)) {
+                        if (!rank.hasMajorRank() || !rank.hasRanks() || !rank.hasExactMajorOrNotRank(rankUnit.getId())) {
                             sender.sendMessage(ChatColor.RED + "Erreur : Cette personne n'a pas le rang.");
                             return true;
                         }
@@ -304,25 +302,25 @@ public class RankCommand implements CommandExecutor {
                     }
 
                     if (account.hasAnAccount()) {
-                        final Rank rank = account.newRankManager();
+                        final var rank = account.newRankManager();
 
-                        final RankUnit rankUnit = RankUnit.getByCommandArg(args[2]);
+                        final RankUnit rankUnit = (RankUnit) main.getRankHandler().getByCommandArg(args[2]).first();
                         if (rankUnit == null) {
-                            sender.sendMessage(Component.text("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n").append(RankUnit.getRankList()));
+                            sender.sendMessage(Component.text("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n").append(main.getRankHandler().getRankList()));
                             return true;
                         }
 
-                        if (rank.getMajorRank().equals(rankUnit)) {
+                        if (rank.hasExactMajorRank(rankUnit.getId())) {
                             sender.sendMessage(ChatColor.RED + "Erreur : Cette personne a déjà le rang.");
                             return true;
                         }
 
-                        if(!rankUnit.equals(RankUnit.JOUEUR) && !rank.hasRank(RankUnit.JOUEUR)){
-                            rank.addRank(RankUnit.JOUEUR);
+                        if(rankUnit.getId() != main.getRankHandler().getDefaultRank().getId() && !rank.hasExactRank(main.getRankHandler().getDefaultRank().getId())) {
+                            rank.addRank(main.getRankHandler().getDefaultRank().getId());
                         }
 
-                        if(rankUnit.equals(RankUnit.JOUEUR)){
-                            rank.removeRank(RankUnit.JOUEUR);
+                        if(rankUnit.getId() == main.getRankHandler().getDefaultRank().getId() && rank.hasExactRank(main.getRankHandler().getDefaultRank().getId())) {
+                            rank.removeRank(main.getRankHandler().getDefaultRank().getId());
                         }
 
                         rank.setMajorRank(rankUnit, sender, true);
@@ -344,7 +342,7 @@ public class RankCommand implements CommandExecutor {
 
             sender.sendMessage(
                     Component.text("                                                \n").color(NamedTextColor.DARK_GRAY).decorate(TextDecoration.STRIKETHROUGH)
-                            .append(RankUnit.getRankList()).style(Style.empty())
+                            .append(main.getRankHandler().getRankList()).style(Style.empty())
                             .append(Component.text("\n                                                ").color(NamedTextColor.DARK_GRAY).decorate(TextDecoration.STRIKETHROUGH)));
         }
 
