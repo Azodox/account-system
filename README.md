@@ -12,7 +12,7 @@ Maven :
     <dependency>
         <groupId>io.github.azodox</groupId>
         <artifactId>accountsystem-paper</artifactId>
-        <version>0.4.0</version>
+        <version>0.5.0</version>
         <!-- Classifier is important, don't remove it or will not be able to import the AccountSystem -->
         <classifier>all</classifier>
     </dependency>
