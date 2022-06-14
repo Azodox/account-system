@@ -1,39 +1,59 @@
 package net.valneas.account;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import net.valneas.account.rank.Rank;
-import net.valneas.account.rank.RankUnit;
-import org.bson.Document;
+import dev.morphia.query.experimental.filters.Filters;
+import net.valneas.account.rank.RankManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
 
 public class AccountManager extends AbstractAccountManager{
 
     private final AccountSystem accountSystem;
 
     public AccountManager(AccountSystem accountSystem, Player player) {
-        super(accountSystem.getMongo().getMongoClient(), player.getName(), player.getUniqueId().toString());
+        super(accountSystem.getDatastore(), player.getName(), player.getUniqueId().toString());
         this.accountSystem = accountSystem;
     }
 
     public AccountManager(AccountSystem accountSystem, String name, String uuid) {
-        super(accountSystem.getMongo().getMongoClient(), name, uuid);
+        super(accountSystem.getDatastore(), name, uuid);
         this.accountSystem = accountSystem;
     }
 
-    public void initDefaultAccount(){
-        this.createAccount(RankUnit.JOUEUR.getId());
-    }
-
-    public Rank newRankManager(){
-        return new Rank(this);
-    }
-
     @Override
-    protected MongoDatabase getDatabase() {
-        return mongo.getDatabase(this.accountSystem.getConfig().getString("mongodb.database"));
+    public void createAccount(int defaultRankId) {
+        if(hasAnAccount())
+            return;
+
+        var account = new Account(
+                this.getUuid(),
+                this.getName(),
+                "",
+                defaultRankId,
+                false,
+                0.0d,
+                0.0d,
+                0.0d,
+                0.0d,
+                0.0d,
+                0.0d,
+                new ArrayList<>(),
+                0L,
+                0L,
+                0L,
+                false
+        );
+
+        accountSystem.getDatastore().save(account);
+    }
+
+    public void initDefaultAccount(){
+        this.createAccount(accountSystem.getRankHandler().getDefaultRank().getId());
+    }
+
+    public RankManager newRankManager() {
+        return new RankManager(accountSystem.getRankHandler(), this);
     }
 
     /*
@@ -43,16 +63,7 @@ public class AccountManager extends AbstractAccountManager{
     public static boolean existsByUUID(String uuid){
         var provider = Bukkit.getServicesManager().getRegistration(AccountSystem.class);
         if(provider != null){
-            var main = provider.getProvider();
-            final MongoClient mongo = main.getMongo().getMongoClient();
-            final MongoDatabase database = mongo.getDatabase(main.getConfig().getString("mongodb.database"));
-            final MongoCollection<Document> accounts = database.getCollection("accounts");
-
-            for (Document document : accounts.find()) {
-                if(document.getString("uuid").equals(uuid)){
-                    return true;
-                }
-            }
+            return provider.getProvider().getDatastore().find(Account.class).filter(Filters.eq("uuid", uuid)).count() != 0;
         }
         return false;
     }
@@ -60,16 +71,7 @@ public class AccountManager extends AbstractAccountManager{
     public static boolean existsByName(String name){
         var provider = Bukkit.getServicesManager().getRegistration(AccountSystem.class);
         if(provider != null){
-            var main = provider.getProvider();
-            final MongoClient mongo = main.getMongo().getMongoClient();
-            final MongoDatabase database = mongo.getDatabase(main.getConfig().getString("mongodb.database"));
-            final MongoCollection<Document> accounts = database.getCollection("accounts");
-
-            for (Document document : accounts.find()) {
-                if(document.getString("name").equals(name)){
-                    return true;
-                }
-            }
+            return provider.getProvider().getDatastore().find(Account.class).filter(Filters.eq("name", name)).count() != 0;
         }
         return false;
     }
@@ -79,16 +81,9 @@ public class AccountManager extends AbstractAccountManager{
 
         var provider = Bukkit.getServicesManager().getRegistration(AccountSystem.class);
         if(provider != null){
-            var main = provider.getProvider();
-            final MongoClient mongo = main.getMongo().getMongoClient();
-            final MongoDatabase database = mongo.getDatabase(main.getConfig().getString("mongodb.database"));
-            final MongoCollection<Document> accounts = database.getCollection("accounts");
-
-            for (Document document : accounts.find()) {
-                if(document.getString("name").equals(name)){
-                    return document.getString("uuid");
-                }
-            }
+            var account = provider.getProvider().getDatastore().find(Account.class).filter(Filters.eq("name", name)).first();
+            if(account != null)
+                return account.getUuid();
         }
         return null;
     }
@@ -98,16 +93,9 @@ public class AccountManager extends AbstractAccountManager{
 
         var provider = Bukkit.getServicesManager().getRegistration(AccountSystem.class);
         if(provider != null){
-            var main = provider.getProvider();
-            final MongoClient mongo = main.getMongo().getMongoClient();
-            final MongoDatabase database = mongo.getDatabase(main.getConfig().getString("mongodb.database"));
-            final MongoCollection<Document> accounts = database.getCollection("accounts");
-
-            for (Document document : accounts.find()) {
-                if(document.getString("uuid").equals(uuid)){
-                    return document.getString("name");
-                }
-            }
+            var account = provider.getProvider().getDatastore().find(Account.class).filter(Filters.eq("uuid", uuid)).first();
+            if(account != null)
+                return account.getName();
         }
         return null;
     }
