@@ -1,8 +1,10 @@
 package net.valneas.account;
 
+import dev.morphia.Datastore;
 import io.github.llewvallis.commandbuilder.CommandBuilder;
 import io.github.llewvallis.commandbuilder.DefaultInferenceProvider;
 import io.github.llewvallis.commandbuilder.ReflectionCommandCallback;
+import lombok.Getter;
 import net.valneas.account.commands.AccountCommand;
 import net.valneas.account.commands.PermissionCommand;
 import net.valneas.account.commands.RankCommand;
@@ -11,8 +13,10 @@ import net.valneas.account.commands.arguments.BooleanArgument;
 import net.valneas.account.commands.arguments.PermissionArgument;
 import net.valneas.account.listener.*;
 import net.valneas.account.mongo.Mongo;
+import net.valneas.account.permission.Permission;
 import net.valneas.account.permission.PermissionDatabase;
 import net.valneas.account.permission.PermissionDispatcher;
+import net.valneas.account.rank.RankHandler;
 import net.valneas.account.util.MongoUtil;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
@@ -25,6 +29,8 @@ public class AccountSystem extends JavaPlugin {
 
     private Mongo mongo;
     private MongoUtil mongoUtil;
+    private @Getter Datastore datastore;
+    private @Getter RankHandler rankHandler;
     private PermissionDatabase permissionDatabase;
     private PermissionDispatcher permissionDispatcher;
 
@@ -51,6 +57,10 @@ public class AccountSystem extends JavaPlugin {
                 getConfig().getString("mongodb.host"),
                 getConfig().getInt("mongodb.port"));
         mongoUtil = new MongoUtil(this);
+
+        this.datastore = new MorphiaInitializer(this.getClass(), mongo.getMongoClient(), getConfig().getString("mongodb.database"), new String[]{"net.valneas.account", "net.valneas.account.rank"}).getDatastore();
+        this.rankHandler = new RankHandler(datastore);
+
         permissionDatabase = new PermissionDatabase(this);
         permissionDispatcher = new PermissionDispatcher(this);
 
@@ -72,7 +82,7 @@ public class AccountSystem extends JavaPlugin {
         registerEvents();
         getCommand("rank").setExecutor(new RankCommand(this));
         getCommand("account").setExecutor(new AccountCommand(this));
-        DefaultInferenceProvider.getGlobal().register(PermissionDatabase.Permission.class, new PermissionArgument());
+        DefaultInferenceProvider.getGlobal().register(Permission.class, new PermissionArgument());
         DefaultInferenceProvider.getGlobal().register(boolean.class, new BooleanArgument());
 
         new CommandBuilder().infer(new PermissionCommand(this)).build(new ReflectionCommandCallback(new PermissionCommand(this)), getCommand("permission"));
