@@ -1,6 +1,6 @@
 package net.valneas.account.commands;
 
-import com.mongodb.MongoClient;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -65,7 +65,7 @@ public class AccountCommand implements CommandExecutor {
                Checking if the player is worthy (*laugh*) of
                manage accounts
              */
-            if(!accountManager.getAccount().containsKey("super-user") || !accountManager.getAccount().getBoolean("super-user")){
+            if(!accountManager.getAccount().isSuperUser()){
                 player.sendMessage(ChatColor.RED + "Erreur : Vous n'avez pas la permission.");
                 return true;
             }
