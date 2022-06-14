@@ -4,11 +4,13 @@ import io.github.llewvallis.commandbuilder.CommandContext;
 import io.github.llewvallis.commandbuilder.ExecuteCommand;
 import io.github.llewvallis.commandbuilder.OptionalArg;
 import io.github.llewvallis.commandbuilder.arguments.StringSetArgument;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.valneas.account.AccountManager;
 import net.valneas.account.AccountSystem;
+import net.valneas.account.permission.Permission;
 import net.valneas.account.permission.PermissionDatabase;
 import net.valneas.account.rank.RankUnit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -24,22 +26,21 @@ public class PermissionCommand {
     }
 
     @ExecuteCommand
-    public void permission(CommandContext ctx, @StringSetArgument.Arg({"add", "remove", "show", "reload", "except", "unexcept"}) String operation, String targetInput, @OptionalArg PermissionDatabase.Permission permission) {
-        var target = PermissionDatabase.DatabaseParser.parse(targetInput);
+    public void permission(CommandContext ctx, @StringSetArgument.Arg({"add", "remove", "show", "reload", "except", "unexcept"}) String operation, String targetInput, @OptionalArg Permission permission) {
+        var parser = new PermissionDatabase.DatabaseParser(accountSystem);
+        var target = parser.parse(targetInput);
         if(target == null){
             ctx.getSender().sendMessage("Invalid target");
             return;
         }
 
         if(operation.equals("add")){
-            this.accountSystem.getPermissionDispatcher().set(target, permission.permission());
-            ctx.getSender().sendMessage("Good");
+            ctx.getSender().sendMessage("Modifié(s) : " + this.accountSystem.getPermissionDispatcher().addPermissionToObject(target, permission.getPermission()).getModifiedCount());
             return;
         }
 
         if(operation.equals("remove")){
-            this.accountSystem.getPermissionDispatcher().remove(target, permission.permission());
-            ctx.getSender().sendMessage("Good");
+            ctx.getSender().sendMessage("Modifié(s) : " + this.accountSystem.getPermissionDispatcher().removePermissionFromObject(target, permission.getPermission()).getModifiedCount());
             return;
         }
 
@@ -50,14 +51,14 @@ public class PermissionCommand {
         }
 
         if(operation.equals("except")){
-            this.accountSystem.getPermissionDispatcher().addException(target, permission);
-            ctx.getSender().sendMessage("Exception '" + target + "' ajoutée à '" + permission.permission() + "' ✔");
+            ctx.getSender().sendMessage("Exception '" + target + "' ajoutée à '" + permission.getPermission() + "' ✔");
+            ctx.getSender().sendMessage("Modifié(s) : " + this.accountSystem.getPermissionDispatcher().addException(target, permission.getPermission()).getModifiedCount());
             return;
         }
 
         if(operation.equals("unexcept")){
-            this.accountSystem.getPermissionDispatcher().removeException(target, permission);
-            ctx.getSender().sendMessage("Exception '" + target + "' retirée de '" + permission.permission() + "' ✔");
+            ctx.getSender().sendMessage("Exception '" + target + "' retirée de '" + permission + "' ✔");
+            ctx.getSender().sendMessage("Modifié(s) : " + this.accountSystem.getPermissionDispatcher().removeException(target, permission.getPermission()).getModifiedCount());
             return;
         }
 
@@ -71,31 +72,36 @@ public class PermissionCommand {
                 if(rankPermissions.isEmpty()){
                     ctx.getSender().sendMessage("Aucune permission n'est attribuée à ce rang"); 
                 }else {
-                    rankPermissions.forEach(perm -> ctx.getSender().sendMessage(perm.permission()));
+                    rankPermissions.forEach(perm -> ctx.getSender().sendMessage(perm.getPermission()));
                 }
             }
         }
     }
 
-    public String getUUIDShowMessage(UUID uuid){
+    public Component getUUIDShowMessage(UUID uuid){
         var accountManager = new AccountManager(this.accountSystem, null, uuid.toString());
         var rankManager = accountManager.newRankManager();
         var ranks = rankManager.getRanks();
 
         var uuidPermissions = this.accountSystem.getPermissionDatabase().getUUIDPermissions(uuid);
-        var majorPermissions = this.accountSystem.getPermissionDatabase().getRankPermissions(rankManager.getMajorRank());
-        var ranksPermissions = new HashMap<RankUnit, List<PermissionDatabase.Permission>>();
+        var majorRank = (RankUnit) rankManager.getMajorRank();
+        var majorPermissions = this.accountSystem.getPermissionDatabase().getRankPermissions(majorRank);
+        var ranksPermissions = new HashMap<RankUnit, List<Permission>>();
 
-        ranks.forEach(rank -> ranksPermissions.put(rank, this.accountSystem.getPermissionDatabase().getRankPermissions(rank)));
+        ranks.forEach(rank -> ranksPermissions.put((RankUnit) rank, this.accountSystem.getPermissionDatabase().getRankPermissions((RankUnit) rank)));
 
-        if(uuidPermissions.isEmpty()){
-            return "Aucune permission n'est attribuée à ce joueur";
+        if(uuidPermissions.isEmpty() && majorPermissions.isEmpty() && ranksPermissions.isEmpty()){
+            return Component.text("Aucune permission n'est attribuée à ce joueur");
         }else{
-            var builder = new StringBuilder();
+            var component = Component.text();
 
             if(!majorPermissions.isEmpty()){
-                builder.append("Hérité du rang majeur (").append(rankManager.getMajorRank().getColor()).append(rankManager.getMajorRank().getName()).append(ChatColor.RESET).append(") :\n");
-                majorPermissions.forEach(perm -> builder.append(perm.permission()).append("\n"));
+                component
+                        .append(Component.text("Hérité du rang majeur ("))
+                        .append(majorRank.name().color(majorRank.getColor()))
+                        .resetStyle()
+                        .append(Component.text(") :\n"));
+                component.append(Component.join(JoinConfiguration.newlines(), majorPermissions.stream().map(perm -> Component.text(perm.getPermission())).toList()));
             }
 
             if(!ranksPermissions.isEmpty()){
@@ -103,14 +109,20 @@ public class PermissionCommand {
                    if(permissions.isEmpty()) {
                        return;
                    }
-                   builder.append("Hérité du rang ").append(rank.getColor()).append(rank.getName()).append(ChatColor.RESET).append(" :\n");
-                   permissions.forEach(perm -> builder.append(perm.permission()).append("\n"));
+                   component
+                           .append(Component.text("Hérité du rang "))
+                           .append(rank.name()).color(rank.getColor())
+                           .resetStyle()
+                           .append(Component.newline());
+                   component.append(Component.join(JoinConfiguration.newlines(), permissions.stream().map(permission -> Component.text(permission.getPermission())).toList()));
                 });
             }
 
-            builder.append("Permissions :\n");
-            uuidPermissions.forEach(perm -> builder.append(perm.permission()).append("\n"));
-            return builder.toString();
+            if(!uuidPermissions.isEmpty()){
+                component.append(Component.text("Permissions :\n"));
+                component.append(Component.join(JoinConfiguration.newlines(), uuidPermissions.stream().map(permission -> Component.text(permission.getPermission())).toList()));
+            }
+            return component.build();
         }
     }
 }
