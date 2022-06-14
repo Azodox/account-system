@@ -5,6 +5,7 @@ import net.valneas.account.events.AccountEvent;
 import net.valneas.account.rank.RankUnit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.Nullable;
 
 public class MajorRankChangedEvent extends AccountEvent {
 
@@ -13,7 +14,7 @@ public class MajorRankChangedEvent extends AccountEvent {
     private final RankUnit newMajorRank;
     private final CommandSender sender;
 
-    public MajorRankChangedEvent(AbstractAccountManager account, RankUnit previousMajorRank, RankUnit newMajorRank, CommandSender sender) {
+    public MajorRankChangedEvent(AbstractAccountManager account, RankUnit previousMajorRank, RankUnit newMajorRank, @Nullable CommandSender sender) {
         super(account);
         this.previousMajorRank = previousMajorRank;
         this.newMajorRank = newMajorRank;
@@ -28,7 +29,7 @@ public class MajorRankChangedEvent extends AccountEvent {
         return newMajorRank;
     }
 
-    public CommandSender getSender() {
+    public @Nullable CommandSender getSender() {
         return sender;
     }
 
