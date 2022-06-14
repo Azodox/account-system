@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    shadow 'io.github.azodox:accountsystem-paper:0.4.0:all'
+    compileOnly 'io.github.azodox:accountsystem-paper:0.4.0:all'
 }
 ```
 ---
