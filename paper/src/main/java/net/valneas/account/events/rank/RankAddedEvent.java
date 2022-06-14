@@ -5,6 +5,7 @@ import net.valneas.account.events.AccountEvent;
 import net.valneas.account.rank.RankUnit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.Nullable;
 
 public class RankAddedEvent extends AccountEvent {
 
@@ -12,7 +13,7 @@ public class RankAddedEvent extends AccountEvent {
     private final RankUnit rankAdded;
     private final CommandSender sender;
 
-    public RankAddedEvent(AbstractAccountManager account, RankUnit rankAdded, CommandSender sender) {
+    public RankAddedEvent(AbstractAccountManager account, RankUnit rankAdded, @Nullable CommandSender sender) {
         super(account);
         this.rankAdded = rankAdded;
         this.sender = sender;
@@ -22,7 +23,7 @@ public class RankAddedEvent extends AccountEvent {
         return rankAdded;
     }
 
-    public CommandSender getSender() {
+    public @Nullable CommandSender getSender() {
         return sender;
     }
 
