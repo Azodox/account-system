@@ -253,7 +253,7 @@ public class RankCommand implements CommandExecutor {
                     if (account.hasAnAccount()) {
                         final var rank = account.newRankManager();
 
-                        final RankUnit rankUnit = (RankUnit) main.getRankHandler().getByCommandArg(args[2]);
+                        final RankUnit rankUnit = (RankUnit) main.getRankHandler().getByCommandArg(args[2]).first();
                         if (rankUnit == null) {
                             sender.sendMessage(Component.text("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n").append(main.getRankHandler().getRankList()));
                             return true;
