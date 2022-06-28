@@ -47,6 +47,9 @@ public class Account {
     @Property("moderation-mod")
     private @Getter final boolean moderationMode;
 
+    @Property("vanish")
+    private @Getter final boolean vanish;
+
     @Property("farming-points")
     private @Getter final double farmingPoints;
 
@@ -71,12 +74,13 @@ public class Account {
     @Property("super-user")
     private @Getter final boolean superUser;
 
-    public Account(String uuid, String name, String lastIp, int majorRankId, boolean moderationMode, double farmingPoints, double farmingPrestige, double xp, double level, double money, double points, List<Integer> ranksIds, long firstConnection, long lastConnection, long lastDisconnection, boolean superUser) {
+    public Account(String uuid, String name, String lastIp, int majorRankId, boolean moderationMode, boolean vanish, double farmingPoints, double farmingPrestige, double xp, double level, double money, double points, List<Integer> ranksIds, long firstConnection, long lastConnection, long lastDisconnection, boolean superUser) {
         this.uuid = uuid;
         this.name = name;
         this.lastIp = lastIp;
         this.majorRankId = majorRankId;
         this.moderationMode = moderationMode;
+        this.vanish = vanish;
         this.farmingPoints = farmingPoints;
         this.farmingPrestige = farmingPrestige;
         this.xp = xp;
