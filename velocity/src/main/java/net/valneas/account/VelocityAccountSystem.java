@@ -1,12 +1,17 @@
 package net.valneas.account;
 
 import com.google.inject.Inject;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import dev.morphia.Datastore;
 import lombok.Getter;
+import net.valneas.account.listener.PermissionSetupListener;
 import net.valneas.account.mongo.Mongo;
+import net.valneas.account.permission.VelocityPermissionDatabase;
+import net.valneas.account.rank.VelocityRankHandler;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.tomlj.Toml;
@@ -25,12 +30,14 @@ public class VelocityAccountSystem {
     private final ProxyServer server;
     private final Logger logger;
     private final Path dataDirectory;
-    private final Mongo mongo;
-    private final @Getter Datastore datastore;
+    private Mongo mongo;
+    private @Getter Datastore datastore;
+    private @Getter VelocityPermissionDatabase permissionDatabase;
+    private @Getter VelocityRankHandler rankHandler;
     private TomlParseResult config;
 
     @Inject
-    public VelocityAccountSystem(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) throws IOException {
+    public VelocityAccountSystem(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
         this.server = server;
         this.logger = logger;
 
@@ -39,6 +46,11 @@ public class VelocityAccountSystem {
         }
 
         this.dataDirectory = dataDirectory;
+        logger.info("Account System plugin for Velocity successfully loaded. v@version@");
+    }
+
+    @Subscribe
+    public void onProxyInitialize(ProxyInitializeEvent event) throws IOException {
         this.initConfig();
 
         this.mongo = new Mongo(
@@ -48,8 +60,10 @@ public class VelocityAccountSystem {
                 getConfig().getString("MongoDB.host"),
                 getConfig().getLong("MongoDB.port").intValue());
         this.datastore = new MorphiaInitializer(this.getClass(), this.mongo.getMongoClient(), getConfig().getString("MongoDB.database"), new String[]{"net.valneas.account"}).getDatastore();
+        this.rankHandler = new VelocityRankHandler(this.getDatastore());
+        this.permissionDatabase = new VelocityPermissionDatabase(this);
 
-        logger.info("Account System plugin for Velocity successfully loaded. v@version@");
+        server.getEventManager().register(this, new PermissionSetupListener(this));
     }
 
     private void initConfig() throws IOException {
