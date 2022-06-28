@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'net.valneas'
-version '0.5.1'
+version '0.5.1-SNAPSHOT'
 
 repositories {
     mavenLocal()
@@ -79,7 +79,7 @@ subprojects {
 
             repositories {
                 maven {
-                    url 'https://s01.oss.sonatype.org/content/repositories/releases/'
+                    url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
 
                     credentials {
                         username = findProperty("centralUser")

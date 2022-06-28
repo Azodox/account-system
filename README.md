@@ -5,14 +5,23 @@ My original account system to manage accounts on a minecraft server.
 
 ### Ajout dans votre projet
 
+:warning: **CURRENTLY A SNAPSHOT VERSION** :warning:
+
 Maven :
 ```xml
+<repositories>
+    <repository>
+        <id>sonatype-snapshots</id>
+        <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+    </repository>
+</repositories>
+
 <dependencies>
 <!-- AccountSystem for Paper (if you wish to use another one simply replace "paper" by something else (e.g. velocity)) -->
     <dependency>
         <groupId>io.github.azodox</groupId>
         <artifactId>accountsystem-paper</artifactId>
-        <version>0.5.1</version>
+        <version>0.5.1-SNAPSHOT</version>
         <!-- Classifier is important, don't remove it or will not be able to import the AccountSystem -->
         <classifier>all</classifier>
     </dependency>
@@ -21,11 +30,13 @@ Maven :
 Gradle :
 ```groovy
 repositories {
-    mavenCentral()
+    maven {
+        url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+    }
 }
 
 dependencies {
-    compileOnly 'io.github.azodox:accountsystem-paper:0.5.1:all'
+    compileOnly 'io.github.azodox:accountsystem-paper:0.5.1-SNAPSHOT:all'
 }
 ```
 ---
