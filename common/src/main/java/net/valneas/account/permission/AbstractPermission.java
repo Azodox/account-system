@@ -5,6 +5,9 @@ import lombok.Getter;
 import org.bson.types.ObjectId;
 
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author Azodox_ (Luke)
@@ -40,5 +43,9 @@ public abstract class AbstractPermission {
         this.playersIds = playersIds;
         this.ranksIds = ranksIds;
         this.exceptIds = exceptIds;
+    }
+
+    public Set<UUID> getPlayers(){
+        return playersIds.stream().map(UUID::fromString).collect(Collectors.toSet());
     }
 }
