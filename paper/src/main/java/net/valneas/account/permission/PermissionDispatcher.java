@@ -23,7 +23,11 @@ public class PermissionDispatcher {
     }
 
     public void onEnable(){
-        this.accountSystem.getPermissionDatabase().getPermissions().stream().filter(Permission::isDefault).forEach(permission -> Bukkit.getPluginManager().addPermission(new org.bukkit.permissions.Permission(permission.getPermission(), "", PermissionDefault.TRUE)));
+        this.accountSystem.getPermissionDatabase().getPermissions().stream().filter(AbstractPermission::isDefault).forEach(permission -> {
+            if (Bukkit.getPluginManager().getPermission(permission.getPermission().replace("-", "")) == null) {
+                Bukkit.getPluginManager().addPermission(new org.bukkit.permissions.Permission(permission.getPermission().replace("-", ""), "", permission.getPermission().startsWith("-") ? PermissionDefault.FALSE : PermissionDefault.TRUE));
+            }
+        });
         Bukkit.getOnlinePlayers().forEach(this::reloadPermissions);
     }
 
@@ -49,12 +53,12 @@ public class PermissionDispatcher {
     }
 
     public void setDefault(String permission){
-        this.accountSystem.getPermissionDatabase().getAsQuery(permission).update(UpdateOperators.set("default", true)).execute();
+        this.accountSystem.getPermissionDatabase().getAsQuery(permission).update(UpdateOperators.set("isDefault", true)).execute();
         reloadPermissions();
     }
 
     public void unsetDefault(String permission){
-        this.accountSystem.getPermissionDatabase().getAsQuery(permission).update(UpdateOperators.set("default", false)).execute();
+        this.accountSystem.getPermissionDatabase().getAsQuery(permission).update(UpdateOperators.set("isDefault", false)).execute();
         reloadPermissions();
     }
 
