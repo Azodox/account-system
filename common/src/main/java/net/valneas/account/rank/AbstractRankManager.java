@@ -14,7 +14,7 @@ import java.util.List;
  * 5/6/2022.
  */
 
-public abstract class AbstractRankManager {
+public abstract class AbstractRankManager<T extends AbstractRankUnit> {
 
     protected final AbstractAccountManager accountManager;
 
@@ -43,9 +43,18 @@ public abstract class AbstractRankManager {
         return query.update(UpdateOperators.pullAll("ranks", List.of(rankPower))).execute();
     }
 
-    public abstract boolean hasExactMajorRank(int rankId);
-    public abstract boolean hasExactRank(int rankId);
-    public abstract boolean hasExactMajorOrNotRank(int rankId);
+    public boolean hasExactMajorRank(int rankId){
+        return this.getMajorRank().getId() == rankId;
+    }
+
+    public boolean hasExactRank(int rankId){
+        return this.getRanks().stream().anyMatch(rank -> rank.getId() == rankId);
+    }
+
+    public boolean hasExactMajorOrNotRank(int rankId){
+        return this.hasExactMajorRank(rankId) || this.hasExactRank(rankId);
+    }
+
     public abstract boolean hasRank(int rankPower);
     public abstract boolean hasAtLeast(int rankPower);
 
@@ -57,6 +66,6 @@ public abstract class AbstractRankManager {
         return !accountManager.getAccount().getRanksIds().isEmpty();
     }
 
-    public abstract AbstractRankUnit getMajorRank();
-    public abstract List<AbstractRankUnit> getRanks();
+    public abstract T getMajorRank();
+    public abstract List<T> getRanks();
 }
