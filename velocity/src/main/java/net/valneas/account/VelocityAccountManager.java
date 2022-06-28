@@ -1,6 +1,7 @@
 package net.valneas.account;
 
 import com.velocitypowered.api.proxy.Player;
+import net.valneas.account.rank.VelocityRankManager;
 
 import java.util.ArrayList;
 
@@ -29,6 +30,7 @@ public class VelocityAccountManager extends AbstractAccountManager {
                 "",
                 defaultRankId,
                 false,
+                false,
                 0.0d,
                 0.0d,
                 0.0d,
@@ -43,5 +45,9 @@ public class VelocityAccountManager extends AbstractAccountManager {
         );
 
         plugin.getDatastore().save(account);
+    }
+
+    public VelocityRankManager newRankManager(){
+        return new VelocityRankManager(plugin.getRankHandler(), this);
     }
 }
