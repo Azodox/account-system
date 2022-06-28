@@ -6,6 +6,7 @@ import io.github.llewvallis.commandbuilder.OptionalArg;
 import io.github.llewvallis.commandbuilder.arguments.StringSetArgument;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.valneas.account.AccountManager;
 import net.valneas.account.AccountSystem;
 import net.valneas.account.permission.Permission;
@@ -84,12 +85,13 @@ public class PermissionCommand {
         var ranks = rankManager.getRanks();
 
         var uuidPermissions = this.accountSystem.getPermissionDatabase().getUUIDPermissions(uuid);
-        var majorRank = (RankUnit) rankManager.getMajorRank();
+        var majorRank = rankManager.getMajorRank();
         var majorPermissions = this.accountSystem.getPermissionDatabase().getRankPermissions(majorRank);
         var ranksPermissions = new HashMap<RankUnit, List<Permission>>();
 
-        ranks.forEach(rank -> ranksPermissions.put((RankUnit) rank, this.accountSystem.getPermissionDatabase().getRankPermissions((RankUnit) rank)));
+        ranks.forEach(rank -> ranksPermissions.put(rank, this.accountSystem.getPermissionDatabase().getRankPermissions(rank)));
 
+        var defaultPermissions = this.accountSystem.getPermissionDatabase().getDefaultPermissions(uuid).stream().filter(permission -> !majorPermissions.contains(permission) && ranksPermissions.values().stream().noneMatch(permissions -> permissions.contains(permission))).toList();
         if(uuidPermissions.isEmpty() && majorPermissions.isEmpty() && ranksPermissions.isEmpty()){
             return Component.text("Aucune permission n'est attribuée à ce joueur");
         }else{
@@ -118,8 +120,10 @@ public class PermissionCommand {
                 });
             }
 
-            if(!uuidPermissions.isEmpty()){
+            if(!uuidPermissions.isEmpty() || !defaultPermissions.isEmpty()){
                 component.append(Component.text("Permissions :\n"));
+                component.append(Component.join(JoinConfiguration.newlines(), defaultPermissions.stream().map(permission -> Component.text(permission.getPermission()).append(Component.text(" (défaut)").color(NamedTextColor.AQUA))).toList()));
+                component.append(Component.newline());
                 component.append(Component.join(JoinConfiguration.newlines(), uuidPermissions.stream().map(permission -> Component.text(permission.getPermission())).toList()));
             }
             return component.build();
