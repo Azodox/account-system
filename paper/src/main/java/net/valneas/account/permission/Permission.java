@@ -18,22 +18,13 @@ import java.util.stream.Collectors;
 
 public class Permission extends AbstractPermission {
 
-    private transient final Set<UUID> playersUUIDs;
     private transient final Set<RankUnit> rankUnits;
     private transient @Getter final Set<Object> exceptions;
 
     public Permission(String permission, boolean isDefault, @NotNull Set<UUID> playersUUIDs, @NotNull Set<RankUnit> rankUnits, @NotNull Set<Object> exceptions) {
         super(permission, isDefault, playersUUIDs.stream().map(UUID::toString).toList(), rankUnits.stream().map(AbstractRankUnit::getId).toList(), exceptions.stream().map(PermissionDatabase.DatabaseParser::parse).toList());
-        this.playersUUIDs = playersUUIDs;
         this.rankUnits = rankUnits;
         this.exceptions = exceptions;
-    }
-
-    public Set<UUID> getPlayers() {
-        if(playersUUIDs == null || playersUUIDs.isEmpty()){
-            return getPlayersIds().stream().map(UUID::fromString).collect(Collectors.toSet());
-        }
-        return playersUUIDs;
     }
 
     public Set<RankUnit> getRanks(RankHandler rankHandler) {
