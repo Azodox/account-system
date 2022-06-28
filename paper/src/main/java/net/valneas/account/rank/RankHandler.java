@@ -7,10 +7,10 @@ import net.kyori.adventure.text.JoinConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RankHandler extends AbstractRankHandler {
+public class RankHandler extends AbstractRankHandler<RankUnit> {
 
     public RankHandler(Datastore datastore) {
-        super(datastore);
+        super(datastore, RankUnit.class);
     }
 
     public Component getRankList(){
