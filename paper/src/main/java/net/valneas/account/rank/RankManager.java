@@ -17,7 +17,7 @@ import java.util.Objects;
  * 5/6/2022.
  */
 
-public class RankManager extends AbstractRankManager {
+public class RankManager extends AbstractRankManager<RankUnit> {
 
     private final RankHandler rankHandler;
     private final AccountManager accountManager;
@@ -84,31 +84,12 @@ public class RankManager extends AbstractRankManager {
     }
 
     @Override
-    public boolean hasExactMajorRank(int rankId) {
-        return this.getMajorRank().getId() == rankId;
-    }
-
-    @Override
-    public boolean hasExactRank(int rankId) {
-        return this.getRanks().stream().anyMatch(rank -> rank.getId() == rankId);
-    }
-
-    @Override
-    public boolean hasExactMajorOrNotRank(int rankId) {
-        return this.hasExactMajorRank(rankId) || this.hasExactRank(rankId);
-    }
-
-    @Override
     public boolean hasRank(int rankPower) {
-        var majorRankUnit = rankHandler.getById(accountManager.getAccount().getMajorRankId()).first();
-        Preconditions.checkNotNull(majorRankUnit, "Major rank not found");
-        if(majorRankUnit instanceof RankUnit majorRank && majorRank.getPower() == rankPower){
+        var majorRank = Preconditions.checkNotNull(rankHandler.getById(accountManager.getAccount().getMajorRankId()).first(), "Major rank not found");
+        if(majorRank.getPower() == rankPower){
             return true;
         } else {
-            if (getRanks().stream()
-                    .filter(RankUnit.class::isInstance)
-                    .map(unit -> (RankUnit) unit)
-                    .anyMatch(unit -> unit.getPower() == rankPower)){
+            if (getRanks().stream().anyMatch(unit -> unit.getPower() == rankPower)){
                 return true;
             } else {
                 return hasAtLeast(rankPower);
@@ -118,20 +99,17 @@ public class RankManager extends AbstractRankManager {
 
     @Override
     public boolean hasAtLeast(int rankPower) {
-        var majorRankUnit = rankHandler.getById(accountManager.getAccount().getMajorRankId()).first();
-        Preconditions.checkNotNull(majorRankUnit, "Major rank not found");
-        if(majorRankUnit instanceof RankUnit majorRank && majorRank.getPower() <= rankPower){
+        var majorRank = rankHandler.getById(accountManager.getAccount().getMajorRankId()).first();
+        Preconditions.checkNotNull(majorRank, "Major rank not found");
+        if(majorRank.getPower() <= rankPower){
             return true;
         } else {
-            return getRanks().stream()
-                    .filter(RankUnit.class::isInstance)
-                    .map(unit -> (RankUnit) unit)
-                    .anyMatch(unit -> unit.getPower() <= rankPower);
+            return getRanks().stream().anyMatch(unit -> unit.getPower() <= rankPower);
         }
     }
 
     @Override
-    public AbstractRankUnit getMajorRank() {
+    public RankUnit getMajorRank() {
         var rank = rankHandler.getById(accountManager.getAccount().getMajorRankId()).first();
         Preconditions.checkNotNull(rank, "Major rank not found");
 
@@ -139,7 +117,7 @@ public class RankManager extends AbstractRankManager {
     }
 
     @Override
-    public List<AbstractRankUnit> getRanks() {
+    public List<RankUnit> getRanks() {
         return accountManager.getAccount().getRanksIds().stream().map(id -> rankHandler.getById(id).first()).filter(Objects::nonNull).toList();
     }
 }
