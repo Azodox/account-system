@@ -1,4 +1,4 @@
-# account-system (v0.5.0)
+# account-system (v0.5.1)
 My original account system to manage accounts on a minecraft server.
 
 ## Développeurs
@@ -12,7 +12,7 @@ Maven :
     <dependency>
         <groupId>io.github.azodox</groupId>
         <artifactId>accountsystem-paper</artifactId>
-        <version>0.5.0</version>
+        <version>0.5.1</version>
         <!-- Classifier is important, don't remove it or will not be able to import the AccountSystem -->
         <classifier>all</classifier>
     </dependency>
@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'io.github.azodox:accountsystem-paper:0.4.0:all'
+    compileOnly 'io.github.azodox:accountsystem-paper:0.5.1:all'
 }
 ```
 ---
