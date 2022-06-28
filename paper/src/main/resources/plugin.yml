@@ -13,6 +13,8 @@ commands:
   permission:
     description: Manage permissions
     usage: '/permission <add/remove/show/reload/except/unexcept> <target> [permission]'
+    permission: 'accountsystem.commands.permission'
   setdefault:
     description: Set default permissions
     usage: '/setdefault <permission> <value>'
+    permission: 'accountsystem.commands.setdefault'
