@@ -7,8 +7,8 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.valneas.account.AccountManager;
-import net.valneas.account.AccountSystem;
+import net.valneas.account.PaperAccountManager;
+import net.valneas.account.PaperAccountSystem;
 import org.bson.Document;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -37,9 +37,9 @@ import java.util.Map;
  */
 public class AccountCommand implements CommandExecutor {
 
-    private final AccountSystem main;
+    private final PaperAccountSystem main;
 
-    public AccountCommand(AccountSystem main) {
+    public AccountCommand(PaperAccountSystem main) {
         this.main = main;
     }
 
@@ -58,7 +58,7 @@ public class AccountCommand implements CommandExecutor {
          */
         if(sender instanceof Player){
             final Player player = (Player) sender;
-            final AccountManager accountManager = new AccountManager(main, player);
+            final PaperAccountManager accountManager = new PaperAccountManager(main, player);
 //            final Rank rank = accountManager.newRankManager();
 
             /*
@@ -311,9 +311,9 @@ public class AccountCommand implements CommandExecutor {
         final MongoDatabase database = mongo.getDatabase(main.getConfig().getString("mongodb.database"));
         final MongoCollection<Document> accounts = database.getCollection("accounts");
 
-        if (AccountManager.existsByName(arg)) {
+        if (PaperAccountManager.existsByName(arg)) {
             return "name";
-        }else if(AccountManager.existsByUUID(arg)){
+        }else if(PaperAccountManager.existsByUUID(arg)){
             return "uuid";
         }else {
             for (Document account : accounts.find()) {
