@@ -19,7 +19,7 @@ import org.bson.types.ObjectId;
         @Index(fields = @Field("power")),
         @Index(fields = @Field("default"))
 })
-public abstract class AbstractRankUnit {
+public abstract class AbstractRankUnit implements RankUnit {
 
     @Id
     private ObjectId _id;
@@ -42,5 +42,20 @@ public abstract class AbstractRankUnit {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String getPrefix() {
+        return this.prefix;
+    }
+
+    @Override
+    public String getSuffix() {
+        return this.suffix;
+    }
+
+    @Override
+    public String getColor() {
+        return this.color;
     }
 }

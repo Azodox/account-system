@@ -10,42 +10,49 @@ import dev.morphia.query.experimental.filters.Filters;
  * 5/6/2022.
  */
 
-public abstract class AbstractRankHandler {
+public abstract class AbstractRankHandler<T extends AbstractRankUnit & RankUnit> implements RankHandler<T> {
 
     protected final Datastore datastore;
+    protected final Class<T> clazz;
 
-    public AbstractRankHandler(Datastore datastore) {
+    public AbstractRankHandler(Datastore datastore, Class<T> clazz) {
         this.datastore = datastore;
+        this.clazz = clazz;
     }
 
-    public Query<AbstractRankUnit> getAllRanksQuery(){
-        return this.datastore.find(AbstractRankUnit.class);
+    @Override
+    public Query<T> getAllRanksQuery(){
+        return this.datastore.find(this.clazz);
     }
 
 
-    public AbstractRankUnit getDefaultRank(){
-        var defaultRank = this.datastore.find(AbstractRankUnit.class).filter(Filters.eq("default", true)).first();
+    @Override
+    public T getDefaultRank(){
+        var defaultRank = this.datastore.find(this.clazz).filter(Filters.eq("default", true)).first();
         if(defaultRank == null){
             System.err.println("No default rank set. Will use the first rank in the database.");
-            defaultRank = this.datastore.find(AbstractRankUnit.class).first();
-            Preconditions.checkNotNull(defaultRank, "No ranks in the database.");
+            defaultRank = Preconditions.checkNotNull(this.datastore.find(this.clazz).first(), "No ranks in the database.");
         }
         return defaultRank;
     }
 
-    public Query<AbstractRankUnit> getById(int id){
-        return this.datastore.find(AbstractRankUnit.class).filter(Filters.eq("id", id));
+    @Override
+    public Query<T> getById(int id){
+        return this.datastore.find(this.clazz).filter(Filters.eq("id", id));
     }
 
-    public Query<AbstractRankUnit> getByPower(int power){
-        return this.datastore.find(AbstractRankUnit.class).filter(Filters.eq("power", power));
+    @Override
+    public Query<T> getByPower(int power){
+        return this.datastore.find(this.clazz).filter(Filters.eq("power", power));
     }
 
-    public Query<AbstractRankUnit> getByName(String name){
-        return this.datastore.find(AbstractRankUnit.class).filter(Filters.eq("name", name));
+    @Override
+    public Query<T> getByName(String name){
+        return this.datastore.find(this.clazz).filter(Filters.eq("name", name));
     }
 
-    public Query<AbstractRankUnit> getByCommandArg(String arg){
+    @Override
+    public Query<T> getByCommandArg(String arg){
         try{
             int i = Integer.parseInt(arg);
             return getById(i);

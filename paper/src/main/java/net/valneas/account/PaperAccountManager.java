@@ -1,22 +1,22 @@
 package net.valneas.account;
 
 import dev.morphia.query.experimental.filters.Filters;
-import net.valneas.account.rank.RankManager;
+import net.valneas.account.rank.PaperRankManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 
-public class AccountManager extends AbstractAccountManager{
+public class PaperAccountManager extends AbstractAccountManager<PaperRankManager> {
 
-    private final AccountSystem accountSystem;
+    private final PaperAccountSystem accountSystem;
 
-    public AccountManager(AccountSystem accountSystem, Player player) {
+    public PaperAccountManager(PaperAccountSystem accountSystem, Player player) {
         super(accountSystem.getDatastore(), player.getName(), player.getUniqueId().toString());
         this.accountSystem = accountSystem;
     }
 
-    public AccountManager(AccountSystem accountSystem, String name, String uuid) {
+    public PaperAccountManager(PaperAccountSystem accountSystem, String name, String uuid) {
         super(accountSystem.getDatastore(), name, uuid);
         this.accountSystem = accountSystem;
     }
@@ -31,6 +31,7 @@ public class AccountManager extends AbstractAccountManager{
                 this.getName(),
                 "",
                 defaultRankId,
+                false,
                 false,
                 0.0d,
                 0.0d,
@@ -52,8 +53,9 @@ public class AccountManager extends AbstractAccountManager{
         this.createAccount(accountSystem.getRankHandler().getDefaultRank().getId());
     }
 
-    public RankManager newRankManager() {
-        return new RankManager(accountSystem.getRankHandler(), this);
+    @Override
+    public PaperRankManager newRankManager() {
+        return new PaperRankManager(accountSystem.getRankHandler(), this);
     }
 
     /*
@@ -61,7 +63,7 @@ public class AccountManager extends AbstractAccountManager{
      */
 
     public static boolean existsByUUID(String uuid){
-        var provider = Bukkit.getServicesManager().getRegistration(AccountSystem.class);
+        var provider = Bukkit.getServicesManager().getRegistration(AccountSystemApi.class);
         if(provider != null){
             return provider.getProvider().getDatastore().find(Account.class).filter(Filters.eq("uuid", uuid)).count() != 0;
         }
@@ -69,7 +71,7 @@ public class AccountManager extends AbstractAccountManager{
     }
 
     public static boolean existsByName(String name){
-        var provider = Bukkit.getServicesManager().getRegistration(AccountSystem.class);
+        var provider = Bukkit.getServicesManager().getRegistration(AccountSystemApi.class);
         if(provider != null){
             return provider.getProvider().getDatastore().find(Account.class).filter(Filters.eq("name", name)).count() != 0;
         }
@@ -79,7 +81,7 @@ public class AccountManager extends AbstractAccountManager{
     public static String getUuidByName(String name){
         if(!existsByName(name)) return null;
 
-        var provider = Bukkit.getServicesManager().getRegistration(AccountSystem.class);
+        var provider = Bukkit.getServicesManager().getRegistration(AccountSystemApi.class);
         if(provider != null){
             var account = provider.getProvider().getDatastore().find(Account.class).filter(Filters.eq("name", name)).first();
             if(account != null)
@@ -91,7 +93,7 @@ public class AccountManager extends AbstractAccountManager{
     public static String getNameByUuid(String uuid){
         if(!existsByUUID(uuid)) return null;
 
-        var provider = Bukkit.getServicesManager().getRegistration(AccountSystem.class);
+        var provider = Bukkit.getServicesManager().getRegistration(AccountSystemApi.class);
         if(provider != null){
             var account = provider.getProvider().getDatastore().find(Account.class).filter(Filters.eq("uuid", uuid)).first();
             if(account != null)

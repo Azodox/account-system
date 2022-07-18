@@ -1,10 +1,10 @@
 name: AccountSystem
 version: @version@
-api-version: 1.18
+api-version: 1.19
 authors:
   - Azodox_
   - Virtual
-main: net.valneas.account.AccountSystem
+main: net.valneas.account.PaperAccountSystem
 commands:
   rank:
     description: Add/Remove/Show ranks from a player
@@ -13,6 +13,8 @@ commands:
   permission:
     description: Manage permissions
     usage: '/permission <add/remove/show/reload/except/unexcept> <target> [permission]'
+    permission: 'accountsystem.commands.permission'
   setdefault:
     description: Set default permissions
     usage: '/setdefault <permission> <value>'
+    permission: 'accountsystem.commands.setdefault'

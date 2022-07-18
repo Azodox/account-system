@@ -1,68 +1,56 @@
 package net.valneas.account.permission;
 
-import dev.morphia.query.Query;
-import dev.morphia.query.experimental.filters.Filters;
-import net.valneas.account.AccountManager;
-import net.valneas.account.AccountSystem;
-import net.valneas.account.rank.RankUnit;
+import net.valneas.account.PaperAccountManager;
+import net.valneas.account.PaperAccountSystem;
+import net.valneas.account.rank.PaperRankUnit;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
-public class PermissionDatabase {
+public class PaperPermissionDatabase extends AbstractPermissionDatabase<PaperPermission> {
 
-    private final AccountSystem accountSystem;
+    private final PaperAccountSystem accountSystem;
 
-    public PermissionDatabase(AccountSystem accountSystem){
+    public PaperPermissionDatabase(PaperAccountSystem accountSystem){
+        super(accountSystem.getDatastore(), PaperPermission.class);
         this.accountSystem = accountSystem;
     }
 
-    public void init(Permission permission){
-        this.accountSystem.getDatastore().save(permission);
-    }
-
-    public Permission get(String permission) {
-        return getAsQuery(permission).first();
-    }
-
-    public Query<Permission> getAsQuery(String permission){
-        return this.accountSystem.getDatastore().find(Permission.class).filter(Filters.eq("permission", permission));
-    }
-
     public void setPlayerPermission(Player player){
-        var account = new AccountManager(this.accountSystem, player);
+        var account = new PaperAccountManager(this.accountSystem, player);
         var rank = account.newRankManager();
 
         player.getEffectivePermissions()
                 .stream().map(PermissionAttachmentInfo::getAttachment)
                 .toList().stream().filter(Objects::nonNull).forEach(PermissionAttachment::remove);
 
-        List<Permission> permissions = new ArrayList<>();
 
-        permissions.addAll(this.getRankPermissions((RankUnit) rank.getMajorRank()));
-        rank.getRanks().forEach(rankUnit -> permissions.addAll(this.getRankPermissions((RankUnit) rankUnit)));
+        List<PaperPermission> permissions = new ArrayList<>();
+
+        permissions.addAll(this.getRankPermissions(rank.getMajorRank()));
+        rank.getRanks().forEach(rankUnit -> permissions.addAll(this.getRankPermissions(rankUnit)));
         permissions.addAll(this.getUUIDPermissions(player.getUniqueId()));
 
         var attachment = player.addAttachment(this.accountSystem);
         permissions.forEach(permission -> attachment.setPermission(permission.getPermission().replace("-", ""), !permission.getPermission().startsWith("-")));
     }
 
-    public List<Permission> getPermissions() {
-        return accountSystem.getDatastore().find(Permission.class).stream().toList();
-    }
-
-    public List<Permission> getRankPermissions(RankUnit rank){
-        return this.getPermissions().stream().filter(permission -> permission.getRanksIds().contains(rank.getId())).filter(permission -> {
+    public List<PaperPermission> getRankPermissions(PaperRankUnit rank){
+        return this.getPermissions().stream()
+                .filter(permission -> permission.getRanksIds().contains(rank.getId())).filter(permission -> {
             if(permission.getExceptions() == null)
                 return true;
             return !permission.getExceptions().contains(rank);
         }).toList();
     }
 
-    public List<Permission> getUUIDPermissions(UUID uuid){
+    public List<PaperPermission> getUUIDPermissions(UUID uuid){
         return this.getPermissions().stream().filter(permission -> {
             if(permission.getPlayers() == null)
                 return false;
@@ -74,11 +62,23 @@ public class PermissionDatabase {
         }).toList();
     }
 
+    public List<PaperPermission> getDefaultPermissions(UUID uuid){
+        return this.getPermissions().stream().filter(AbstractPermission::isDefault).filter(permission -> {
+            if(permission.getPlayers() == null)
+                return true;
+            return !permission.getPlayers().contains(uuid);
+        }).filter(permission -> {
+            if(permission.getExceptions() == null)
+                return true;
+            return !permission.getExceptions().contains(uuid);
+        }).toList();
+    }
+
     public static class DatabaseParser {
 
-        private final AccountSystem accountSystem;
+        private final PaperAccountSystem accountSystem;
 
-        public DatabaseParser(AccountSystem accountSystem) {
+        public DatabaseParser(PaperAccountSystem accountSystem) {
             this.accountSystem = accountSystem;
         }
 
@@ -103,8 +103,8 @@ public class PermissionDatabase {
         public static String parse(Object value){
             if(value == null) return null;
 
-            if(value instanceof RankUnit){
-                return String.valueOf(((RankUnit) value).getId());
+            if(value instanceof PaperRankUnit){
+                return String.valueOf(((PaperRankUnit) value).getId());
             } else if(value instanceof UUID){
                 return value.toString();
             } else {

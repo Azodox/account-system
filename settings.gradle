@@ -2,4 +2,5 @@ rootProject.name = 'AccountSystem'
 include 'velocity'
 include 'paper'
 include 'common'
+include 'api'
 

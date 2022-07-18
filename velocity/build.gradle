@@ -29,7 +29,7 @@ blossom {
 }
 
 dependencies {
-    shadow 'com.velocitypowered:velocity-api:3.1.0'
+    compileOnly 'com.velocitypowered:velocity-api:3.1.0'
     implementation 'net.kyori:adventure-text-minimessage:4.10.1'
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'org.tomlj:tomlj:1.0.0'

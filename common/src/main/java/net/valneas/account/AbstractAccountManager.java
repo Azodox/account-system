@@ -5,8 +5,9 @@ import dev.morphia.Datastore;
 import dev.morphia.query.Query;
 import dev.morphia.query.experimental.filters.Filters;
 import dev.morphia.query.experimental.updates.UpdateOperators;
+import net.valneas.account.rank.AbstractRankManager;
 
-public abstract class AbstractAccountManager {
+public abstract class AbstractAccountManager<T extends AbstractRankManager<?, ?>> implements AccountManager<Account, T> {
 
     protected final Datastore datastore;
     private final String name, uuid;
@@ -17,12 +18,15 @@ public abstract class AbstractAccountManager {
         this.uuid = uuid;
     }
 
+    @Override
     public abstract void createAccount(int defaultRankId);
 
+    @Override
     public boolean hasAnAccount(){
         return this.datastore.find(Account.class).filter(Filters.eq("uuid", uuid)).count() != 0;
     }
 
+    @Override
     public void updateOnLogin(){
         if(!hasAnAccount()) return;
         var query = getAccountQuery();
@@ -34,18 +38,22 @@ public abstract class AbstractAccountManager {
             query.update(UpdateOperators.set("name", name)).execute();
     }
 
+    @Override
     public Query<Account> getAccountQuery(){
         return this.datastore.find(Account.class).filter(Filters.eq("uuid", uuid));
     }
 
+    @Override
     public Account getAccount(){
         return getAccountQuery().first();
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getUuid() {
         return uuid;
     }

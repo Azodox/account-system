@@ -3,9 +3,9 @@ package net.valneas.account.permission;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.Query;
 import dev.morphia.query.experimental.updates.UpdateOperators;
-import net.valneas.account.AccountManager;
-import net.valneas.account.AccountSystem;
-import net.valneas.account.rank.RankUnit;
+import net.valneas.account.PaperAccountManager;
+import net.valneas.account.PaperAccountSystem;
+import net.valneas.account.rank.PaperRankUnit;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionDefault;
@@ -14,16 +14,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public class PermissionDispatcher {
+public class PaperPermissionDispatcher implements PermissionDispatcher {
 
-    private final AccountSystem accountSystem;
+    private final PaperAccountSystem accountSystem;
 
-    public PermissionDispatcher(AccountSystem accountSystem){
+    public PaperPermissionDispatcher(PaperAccountSystem accountSystem){
         this.accountSystem = accountSystem;
     }
 
     public void onEnable(){
-        this.accountSystem.getPermissionDatabase().getPermissions().stream().filter(Permission::isDefault).forEach(permission -> Bukkit.getPluginManager().addPermission(new org.bukkit.permissions.Permission(permission.getPermission(), "", PermissionDefault.TRUE)));
+        this.accountSystem.getPermissionDatabase().getPermissions().stream().filter(AbstractPermission::isDefault).forEach(permission -> {
+            if (Bukkit.getPluginManager().getPermission(permission.getPermission().replace("-", "")) == null) {
+                Bukkit.getPluginManager().addPermission(new org.bukkit.permissions.Permission(permission.getPermission().replace("-", ""), "", permission.getPermission().startsWith("-") ? PermissionDefault.FALSE : PermissionDefault.TRUE));
+            }
+        });
         Bukkit.getOnlinePlayers().forEach(this::reloadPermissions);
     }
 
@@ -36,9 +40,9 @@ public class PermissionDispatcher {
             this.accountSystem.getPermissionDatabase().setPlayerPermission(player);
         }else if(target instanceof UUID uuid){
             this.accountSystem.getPermissionDatabase().setPlayerPermission(Bukkit.getPlayer(uuid));
-        }else if(target instanceof RankUnit rankUnit){
+        }else if(target instanceof PaperRankUnit rankUnit){
             Bukkit.getOnlinePlayers().forEach(player -> {
-                var account = new AccountManager(this.accountSystem, player);
+                var account = new PaperAccountManager(this.accountSystem, player);
                 var rank = account.newRankManager();
 
                 if(rank.hasExactRank(rankUnit.getId())){
@@ -49,83 +53,100 @@ public class PermissionDispatcher {
     }
 
     public void setDefault(String permission){
-        this.accountSystem.getPermissionDatabase().getAsQuery(permission).update(UpdateOperators.set("default", true)).execute();
+        this.accountSystem.getPermissionDatabase().getAsQuery(permission).update(UpdateOperators.set("isDefault", true)).execute();
         reloadPermissions();
     }
 
     public void unsetDefault(String permission){
-        this.accountSystem.getPermissionDatabase().getAsQuery(permission).update(UpdateOperators.set("default", false)).execute();
+        this.accountSystem.getPermissionDatabase().getAsQuery(permission).update(UpdateOperators.set("isDefault", false)).execute();
         reloadPermissions();
     }
 
-    public void set(Object target, Permission permission, String field, Object value){
-        set(target, permission.getPermission(), field, value);
+    @Override
+    public <T> void set(Object target, T permission, String field, Object value){
+        if(permission instanceof PaperPermission perm){
+            set(target, perm.getPermission(), field, value);
+        }else{
+            throw new IllegalArgumentException("permission must be of type PaperPermission");
+        }
     }
 
+    @Override
     public void set(Object target, String permission, String field, Object value){
         this.accountSystem.getPermissionDatabase().getAsQuery(permission).update(UpdateOperators.set(field, value)).execute();
         reloadPermissions(target);
     }
 
-    public void set(Player player){
-        this.accountSystem.getPermissionDatabase().setPlayerPermission(player);
+    @Override
+    public <T> void set(T player) {
+        if(player instanceof Player p){
+            this.accountSystem.getPermissionDatabase().setPlayerPermission(p);
+        }else {
+            throw new IllegalArgumentException("player must be of type Player");
+        }
     }
 
+    @Override
     public UpdateResult addException(Object exception, String permission){
         UpdateResult result = null;
         if(exception instanceof Player player) {
             result = this.accountSystem.getPermissionDatabase().getAsQuery(permission).update(UpdateOperators.addToSet("exceptions", player.getUniqueId())).execute();
         } else if(exception instanceof UUID uuid){
             result = this.accountSystem.getPermissionDatabase().getAsQuery(permission).update(UpdateOperators.addToSet("exceptions", uuid)).execute();
-        } else if(exception instanceof RankUnit rankUnit){
+        } else if(exception instanceof PaperRankUnit rankUnit){
             result = this.accountSystem.getPermissionDatabase().getAsQuery(permission).update(UpdateOperators.addToSet("exceptions", rankUnit.getId())).execute();
         }
         return result;
     }
 
+    @Override
     public UpdateResult removeException(Object exception, String permission){
         UpdateResult result = null;
         if(exception instanceof Player player) {
             result = this.accountSystem.getPermissionDatabase().getAsQuery(permission).update(UpdateOperators.pullAll("exceptions", List.of(player.getUniqueId()))).execute();
         } else if(exception instanceof UUID uuid){
             result = this.accountSystem.getPermissionDatabase().getAsQuery(permission).update(UpdateOperators.pullAll("exceptions", List.of(uuid))).execute();
-        } else if(exception instanceof RankUnit rankUnit){
+        } else if(exception instanceof PaperRankUnit rankUnit){
             result = this.accountSystem.getPermissionDatabase().getAsQuery(permission).update(UpdateOperators.pullAll("exceptions", List.of(rankUnit.getId()))).execute();
         }
         return result;
     }
 
+    @Override
     public UpdateResult addPermissionToObject(Object target, String permission){
         if(this.accountSystem.getPermissionDatabase().getAsQuery(permission).count() == 0){
-            this.accountSystem.getPermissionDatabase().init(new Permission(permission, false, Set.of(), Set.of(), Set.of()));
+            this.accountSystem.getPermissionDatabase().init(new PaperPermission(permission, false, Set.of(), Set.of(), Set.of()));
         }
         return this.addAccordingToObject(target, this.accountSystem.getPermissionDatabase().getAsQuery(permission));
     }
 
+    @Override
     public UpdateResult removePermissionFromObject(Object target, String permission){
         return this.removeAccordingToObject(target, this.accountSystem.getPermissionDatabase().getAsQuery(permission));
     }
 
-    private UpdateResult addAccordingToObject(Object target, Query<Permission> query){
+    @Override
+    public <T> UpdateResult addAccordingToObject(Object target, Query<T> query) {
         UpdateResult result = null;
         if(target instanceof Player player) {
             result = query.update(UpdateOperators.addToSet("players", player.getUniqueId().toString())).execute();
         }else if(target instanceof UUID uuid){
             result = query.update(UpdateOperators.addToSet("players", uuid.toString())).execute();
-        }else if(target instanceof RankUnit rankUnit){
+        }else if(target instanceof PaperRankUnit rankUnit){
             result = query.update(UpdateOperators.addToSet("ranks", rankUnit.getId())).execute();
         }
         reloadPermissions(target);
         return result;
     }
 
-    private UpdateResult removeAccordingToObject(Object target, Query<Permission> query){
+    @Override
+    public <T> UpdateResult removeAccordingToObject(Object target, Query<T> query) {
         UpdateResult result = null;
         if(target instanceof Player player) {
             result = query.update(UpdateOperators.pullAll("players", List.of(player.getUniqueId().toString()))).execute();
         }else if(target instanceof UUID uuid){
             result = query.update(UpdateOperators.pullAll("players", List.of(uuid.toString()))).execute();
-        }else if(target instanceof RankUnit rankUnit){
+        }else if(target instanceof PaperRankUnit rankUnit){
             result = query.update(UpdateOperators.pullAll("ranks", List.of(rankUnit.getId()))).execute();
         }
         reloadPermissions(target);

@@ -4,9 +4,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
-public class RankUnit extends AbstractRankUnit {
+public class PaperRankUnit extends AbstractRankUnit {
 
-    public RankUnit(String name, String prefix, String suffix, String color, int power, int id, boolean isDefault) {
+    public PaperRankUnit(String name, String prefix, String suffix, String color, int power, int id, boolean isDefault) {
         super(name, prefix, suffix, color, power, id, isDefault);
     }
 
@@ -14,15 +14,15 @@ public class RankUnit extends AbstractRankUnit {
         return Component.text(name);
     }
 
-    public Component getPrefix() {
+    public Component prefix() {
         return MiniMessage.miniMessage().deserialize(prefix);
     }
 
-    public Component getSuffix() {
+    public Component suffix() {
         return MiniMessage.miniMessage().deserialize(suffix);
     }
 
-    public NamedTextColor getColor() {
+    public NamedTextColor color() {
         return NamedTextColor.NAMES.value(color);
     }
 

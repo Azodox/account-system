@@ -1,28 +1,28 @@
 package net.valneas.account.listener;
 
 import io.github.leonardosnt.bungeechannelapi.BungeeChannelApi;
-import net.valneas.account.AccountSystem;
+import net.valneas.account.PaperAccountSystem;
 import net.valneas.account.events.rank.RankRemovedEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
+import org.greenrobot.eventbus.Subscribe;
 
-public class RankRemovedListener implements Listener {
+public class RankRemovedListener {
 
-    private final AccountSystem main;
+    private final PaperAccountSystem main;
 
-    public RankRemovedListener(AccountSystem main) {
+    public RankRemovedListener(PaperAccountSystem main) {
         this.main = main;
     }
 
-    @EventHandler
-    public void onRankRemoved(RankRemovedEvent e){
-        final var account = e.getAccount();
+    @Subscribe
+    public void onRankRemoved(RankRemovedEvent<CommandSender> event) {
+        final var account = event.getAccountManager();
 
         String message = ChatColor.YELLOW + "" + ChatColor.ITALIC + "Michel §r§l➔ " + ChatColor.YELLOW +
-                "Coucou, apparement tu as perdu le rang §r" + ChatColor.BOLD + e.getRankRemoved().getName() + ChatColor.YELLOW +
+                "Coucou, apparement tu as perdu le rang §r" + ChatColor.BOLD + main.getRankHandler().getById(event.getRankId()).first().getName() + ChatColor.YELLOW +
                 ". Je ne ressens pas d'émotion mais si c'était important, je suis désolé pour toi. #SAD";
 
         if(main.isBungeeMode()){
@@ -41,7 +41,7 @@ public class RankRemovedListener implements Listener {
             }
         }
 
-        e.getSender().sendMessage(
+        event.getSender().sendMessage(
                 ChatColor.YELLOW + "" + ChatColor.ITALIC + "Michel §r§l➔ " + ChatColor.YELLOW +
                         "Message transmit et rang changé ✔"
         );

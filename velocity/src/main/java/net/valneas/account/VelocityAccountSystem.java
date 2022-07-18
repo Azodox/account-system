@@ -1,13 +1,25 @@
 package net.valneas.account;
 
 import com.google.inject.Inject;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import dev.morphia.Datastore;
 import lombok.Getter;
+import net.valneas.account.listener.PermissionSetupListener;
 import net.valneas.account.mongo.Mongo;
+import net.valneas.account.permission.PermissionDispatcher;
+import net.valneas.account.permission.VelocityPermissionDatabase;
+import net.valneas.account.provider.AccountSystemApiProvider;
+import net.valneas.account.rank.RankManager;
+import net.valneas.account.rank.RankUnit;
+import net.valneas.account.rank.VelocityRankHandler;
 import org.apache.commons.io.FileUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.tomlj.Toml;
 import org.tomlj.TomlParseResult;
@@ -20,17 +32,19 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Plugin(id = "@id@", name = "@name@", version = "@version@")
-public class VelocityAccountSystem {
+public class VelocityAccountSystem implements AccountSystemApi {
 
     private final ProxyServer server;
     private final Logger logger;
     private final Path dataDirectory;
-    private final Mongo mongo;
-    private final @Getter Datastore datastore;
+    private Mongo mongo;
+    private @Getter Datastore datastore;
+    private @Getter VelocityPermissionDatabase permissionDatabase;
+    private @Getter VelocityRankHandler rankHandler;
     private TomlParseResult config;
 
     @Inject
-    public VelocityAccountSystem(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) throws IOException {
+    public VelocityAccountSystem(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
         this.server = server;
         this.logger = logger;
 
@@ -39,6 +53,11 @@ public class VelocityAccountSystem {
         }
 
         this.dataDirectory = dataDirectory;
+        logger.info("Account System plugin for Velocity successfully loaded. v@version@");
+    }
+
+    @Subscribe
+    public void onProxyInitialize(ProxyInitializeEvent event) throws IOException {
         this.initConfig();
 
         this.mongo = new Mongo(
@@ -48,8 +67,12 @@ public class VelocityAccountSystem {
                 getConfig().getString("MongoDB.host"),
                 getConfig().getLong("MongoDB.port").intValue());
         this.datastore = new MorphiaInitializer(this.getClass(), this.mongo.getMongoClient(), getConfig().getString("MongoDB.database"), new String[]{"net.valneas.account"}).getDatastore();
+        this.rankHandler = new VelocityRankHandler(this.getDatastore());
+        this.permissionDatabase = new VelocityPermissionDatabase(this);
 
-        logger.info("Account System plugin for Velocity successfully loaded. v@version@");
+        server.getEventManager().register(this, new PermissionSetupListener(this));
+        registerAccountSystemService();
+        registerRankHandlerService();
     }
 
     private void initConfig() throws IOException {
@@ -92,5 +115,31 @@ public class VelocityAccountSystem {
 
     public Mongo getMongo() {
         return mongo;
+    }
+
+    @NotNull
+    @Override
+    public <A extends AbstractAccount, R extends RankManager<? extends RankUnit>, T> AccountManager<A, R> getAccountManager(T playerType) {
+        if(playerType instanceof Player player){
+            return (AccountManager<A, R>) new VelocityAccountManager(this, player);
+        }else{
+            throw new IllegalArgumentException("Wrong player type for this platform.");
+        }
+    }
+
+    @Nullable
+    @Override
+    public PermissionDispatcher getPermissionDispatcher() {
+        return null;
+    }
+
+    @Override
+    public void registerAccountSystemService() {
+        AccountSystemApiProvider.register(this);
+    }
+
+    @Override
+    public void registerRankHandlerService() {
+        AccountSystemApiProvider.register(this.rankHandler);
     }
 }

@@ -2,19 +2,19 @@ package net.valneas.account.commands;
 
 import io.github.llewvallis.commandbuilder.CommandContext;
 import io.github.llewvallis.commandbuilder.ExecuteCommand;
-import net.valneas.account.AccountSystem;
-import net.valneas.account.permission.Permission;
+import net.valneas.account.PaperAccountSystem;
+import net.valneas.account.permission.PaperPermission;
 
 public class SetDefaultCommand {
 
-    private final AccountSystem accountSystem;
+    private final PaperAccountSystem accountSystem;
 
-    public SetDefaultCommand(AccountSystem accountSystem) {
+    public SetDefaultCommand(PaperAccountSystem accountSystem) {
         this.accountSystem = accountSystem;
     }
 
     @ExecuteCommand
-    public void setDefault(CommandContext ctx, Permission permission, boolean value) {
+    public void setDefault(CommandContext ctx, PaperPermission permission, boolean value) {
         if(value){
             this.accountSystem.getPermissionDispatcher().setDefault(permission.getPermission());
             ctx.getSender().sendMessage("'" + permission.getPermission() + "' définie comme par défaut ✔");

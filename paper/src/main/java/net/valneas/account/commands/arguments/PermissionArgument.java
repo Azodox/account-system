@@ -2,18 +2,18 @@ package net.valneas.account.commands.arguments;
 
 import io.github.llewvallis.commandbuilder.ArgumentParser;
 import io.github.llewvallis.commandbuilder.CommandContext;
-import net.valneas.account.permission.Permission;
+import net.valneas.account.permission.PaperPermission;
 import org.bukkit.Bukkit;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class PermissionArgument implements ArgumentParser<Permission> {
+public class PermissionArgument implements ArgumentParser<PaperPermission> {
 
     @Override
-    public Permission parse(String argument, int position, CommandContext context) {
-        return new Permission(argument, false, Set.of(), Set.of(), Set.of());
+    public PaperPermission parse(String argument, int position, CommandContext context) {
+        return new PaperPermission(argument, false, Set.of(), Set.of(), Set.of());
     }
 
     @Override

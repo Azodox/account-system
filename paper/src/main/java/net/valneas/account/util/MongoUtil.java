@@ -3,17 +3,17 @@ package net.valneas.account.util;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import net.valneas.account.AccountManager;
-import net.valneas.account.AccountSystem;
+import net.valneas.account.PaperAccountManager;
+import net.valneas.account.PaperAccountSystem;
 import org.bson.Document;
 import org.bukkit.entity.Player;
 
 public class MongoUtil {
 
-    private final AccountSystem main;
+    private final PaperAccountSystem main;
     private final MongoClient mongo;
 
-    public MongoUtil(AccountSystem main) {
+    public MongoUtil(PaperAccountSystem main) {
         this.main = main;
         this.mongo = main.getMongo().getMongoClient();
     }
@@ -21,12 +21,12 @@ public class MongoUtil {
 
     /** @deprecated */
     @Deprecated
-    public AccountManager getAccountManager(Player player){
-        return new AccountManager(main, player);
+    public PaperAccountManager getAccountManager(Player player){
+        return new PaperAccountManager(main, player);
     }
 
     public Document getByName(String name){
-        if(!AccountManager.existsByName(name)){
+        if(!PaperAccountManager.existsByName(name)){
             return null;
         }
 
@@ -43,7 +43,7 @@ public class MongoUtil {
     }
 
     public Document getByUUID(String uuid){
-        if(!AccountManager.existsByUUID(uuid)){
+        if(!PaperAccountManager.existsByUUID(uuid)){
             return null;
         }
 
