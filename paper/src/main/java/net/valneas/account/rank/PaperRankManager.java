@@ -2,12 +2,12 @@ package net.valneas.account.rank;
 
 import com.google.common.base.Preconditions;
 import com.mongodb.client.result.UpdateResult;
-import net.valneas.account.AccountManager;
+import net.valneas.account.PaperAccountManager;
 import net.valneas.account.events.rank.MajorRankChangedEvent;
 import net.valneas.account.events.rank.RankAddedEvent;
 import net.valneas.account.events.rank.RankRemovedEvent;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 import java.util.Objects;
@@ -17,68 +17,70 @@ import java.util.Objects;
  * 5/6/2022.
  */
 
-public class RankManager extends AbstractRankManager<RankUnit> {
+public class PaperRankManager extends AbstractRankManager<PaperAccountManager, PaperRankUnit> {
 
-    private final RankHandler rankHandler;
-    private final AccountManager accountManager;
+    private final PaperRankHandler rankHandler;
+    private final PaperAccountManager accountManager;
 
-    public RankManager(RankHandler rankHandler, AccountManager accountManager) {
+    public PaperRankManager(RankHandler<PaperRankUnit> rankHandler, PaperAccountManager accountManager) {
         super(accountManager);
-        this.rankHandler = rankHandler;
+        if(rankHandler instanceof PaperRankHandler handler){
+            this.rankHandler = handler;
+        }else{
+            throw new IllegalArgumentException("rankHandler must be of type PaperRankHandler");
+        }
+
         this.accountManager = accountManager;
     }
 
     /**
      * Set the major rank of the account. This method allows you to choose whether to call any events.
-     * @param rankUnit The rank unit to set as the major rank.
+     * @param rankId The id of the rank to set as the major rank.
      * @param sender The sender of the command. (might be null)
      * @param event Whether to call the events.
      * @return The result of the update.
      */
-    public UpdateResult setMajorRank(RankUnit rankUnit, CommandSender sender,  boolean event){
-        Preconditions.checkNotNull(rankUnit, "RankUnit cannot be null");
+    public <T> UpdateResult setMajorRank(int rankId, T sender,  boolean event){
         Preconditions.checkNotNull(sender, "CommandSender cannot be null");
 
-        RankUnit previousMajorRank = (RankUnit) this.getMajorRank();
-        UpdateResult result = this.setMajorRank(rankUnit.getId());
-        if(event) {
-            Bukkit.getPluginManager().callEvent(new MajorRankChangedEvent(accountManager, previousMajorRank, rankUnit, sender));
+        PaperRankUnit previousMajorRank = this.getMajorRank();
+        UpdateResult result = this.setMajorRank(rankId);
+        if(event && sender instanceof CommandSender commandSender) {
+            EventBus.getDefault().post(new MajorRankChangedEvent<>(this.accountManager, previousMajorRank.getId(), rankId, commandSender));
         }
         return result;
     }
 
     /**
      * Add a rank to the account. This method allows you to choose whether to call any events.
-     * @param rankUnit The rank to add.
+     * @param rankId The id of the rank to add.
      * @param sender The command sender who executed the command. (might be null)
      * @param event Whether to call the event.
      * @return The result of the update.
      */
-    public UpdateResult addRank(RankUnit rankUnit, CommandSender sender, boolean event){
-        Preconditions.checkNotNull(rankUnit, "RankUnit cannot be null.");
+    public <T> UpdateResult addRank(int rankId, T sender, boolean event){
         Preconditions.checkNotNull(sender, "CommandSender cannot be null.");
 
-        UpdateResult result = super.addRank(rankUnit.getId());
-        if(event){
-            Bukkit.getPluginManager().callEvent(new RankAddedEvent(accountManager, rankUnit, sender));
+        UpdateResult result = super.addRank(rankId);
+        if(event && sender instanceof CommandSender commandSender){
+            EventBus.getDefault().post(new RankAddedEvent<>(this.accountManager, rankId, commandSender));
         }
         return result;
     }
 
     /**
      * Remove a rank from the account. This method allows you to choose whether to call any events.
-     * @param rankUnit The rank to remove.
+     * @param rankId The id of the rank to remove.
      * @param sender The command sender who executed the command. (might be null)
      * @param event Whether to call the event.
      * @return The result of the update.
      */
-    public UpdateResult removeRank(RankUnit rankUnit, CommandSender sender,  boolean event){
-        Preconditions.checkNotNull(rankUnit, "RankUnit cannot be null.");
+    public <T> UpdateResult removeRank(int rankId, T sender,  boolean event){
         Preconditions.checkNotNull(sender, "CommandSender cannot be null.");
 
-        UpdateResult result = this.removeRank(rankUnit.getId());
-        if(event){
-            Bukkit.getPluginManager().callEvent(new RankRemovedEvent(accountManager, rankUnit, sender));
+        UpdateResult result = this.removeRank(rankId);
+        if(event && sender instanceof CommandSender commandSender){
+            EventBus.getDefault().post(new RankRemovedEvent<>(this.accountManager, rankId, commandSender));
         }
         return result;
     }
@@ -109,7 +111,7 @@ public class RankManager extends AbstractRankManager<RankUnit> {
     }
 
     @Override
-    public RankUnit getMajorRank() {
+    public PaperRankUnit getMajorRank() {
         var rank = rankHandler.getById(accountManager.getAccount().getMajorRankId()).first();
         Preconditions.checkNotNull(rank, "Major rank not found");
 
@@ -117,7 +119,7 @@ public class RankManager extends AbstractRankManager<RankUnit> {
     }
 
     @Override
-    public List<RankUnit> getRanks() {
+    public List<PaperRankUnit> getRanks() {
         return accountManager.getAccount().getRanksIds().stream().map(id -> rankHandler.getById(id).first()).filter(Objects::nonNull).toList();
     }
 }
