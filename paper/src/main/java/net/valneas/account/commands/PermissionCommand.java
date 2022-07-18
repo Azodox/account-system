@@ -7,11 +7,11 @@ import io.github.llewvallis.commandbuilder.arguments.StringSetArgument;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.valneas.account.AccountManager;
-import net.valneas.account.AccountSystem;
-import net.valneas.account.permission.Permission;
-import net.valneas.account.permission.PermissionDatabase;
-import net.valneas.account.rank.RankUnit;
+import net.valneas.account.PaperAccountManager;
+import net.valneas.account.PaperAccountSystem;
+import net.valneas.account.permission.PaperPermission;
+import net.valneas.account.permission.PaperPermissionDatabase;
+import net.valneas.account.rank.PaperRankUnit;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -20,15 +20,15 @@ import java.util.UUID;
 
 public class PermissionCommand {
 
-    private final AccountSystem accountSystem;
+    private final PaperAccountSystem accountSystem;
 
-    public PermissionCommand(AccountSystem accountSystem) {
+    public PermissionCommand(PaperAccountSystem accountSystem) {
         this.accountSystem = accountSystem;
     }
 
     @ExecuteCommand
-    public void permission(CommandContext ctx, @StringSetArgument.Arg({"add", "remove", "show", "reload", "except", "unexcept"}) String operation, String targetInput, @OptionalArg Permission permission) {
-        var parser = new PermissionDatabase.DatabaseParser(accountSystem);
+    public void permission(CommandContext ctx, @StringSetArgument.Arg({"add", "remove", "show", "reload", "except", "unexcept"}) String operation, String targetInput, @OptionalArg PaperPermission permission) {
+        var parser = new PaperPermissionDatabase.DatabaseParser(accountSystem);
         var target = parser.parse(targetInput);
         if(target == null){
             ctx.getSender().sendMessage("Invalid target");
@@ -68,7 +68,7 @@ public class PermissionCommand {
                 ctx.getSender().sendMessage(this.getUUIDShowMessage(player.getUniqueId()));
             }else if(target instanceof UUID uuid){
                 ctx.getSender().sendMessage(this.getUUIDShowMessage(uuid));
-            }else if(target instanceof RankUnit rankUnit){
+            }else if(target instanceof PaperRankUnit rankUnit){
                 var rankPermissions = this.accountSystem.getPermissionDatabase().getRankPermissions(rankUnit);
                 if(rankPermissions.isEmpty()){
                     ctx.getSender().sendMessage("Aucune permission n'est attribuée à ce rang"); 
@@ -80,14 +80,14 @@ public class PermissionCommand {
     }
 
     public Component getUUIDShowMessage(UUID uuid){
-        var accountManager = new AccountManager(this.accountSystem, null, uuid.toString());
+        var accountManager = new PaperAccountManager(this.accountSystem, null, uuid.toString());
         var rankManager = accountManager.newRankManager();
         var ranks = rankManager.getRanks();
 
         var uuidPermissions = this.accountSystem.getPermissionDatabase().getUUIDPermissions(uuid);
         var majorRank = rankManager.getMajorRank();
         var majorPermissions = this.accountSystem.getPermissionDatabase().getRankPermissions(majorRank);
-        var ranksPermissions = new HashMap<RankUnit, List<Permission>>();
+        var ranksPermissions = new HashMap<PaperRankUnit, List<PaperPermission>>();
 
         ranks.forEach(rank -> ranksPermissions.put(rank, this.accountSystem.getPermissionDatabase().getRankPermissions(rank)));
 
@@ -100,10 +100,11 @@ public class PermissionCommand {
             if(!majorPermissions.isEmpty()){
                 component
                         .append(Component.text("Hérité du rang majeur ("))
-                        .append(majorRank.name().color(majorRank.getColor()))
+                        .append(majorRank.name().color(majorRank.color()))
                         .resetStyle()
                         .append(Component.text(") :\n"));
                 component.append(Component.join(JoinConfiguration.newlines(), majorPermissions.stream().map(perm -> Component.text(perm.getPermission())).toList()));
+                component.append(Component.newline());
             }
 
             if(!ranksPermissions.isEmpty()){
@@ -113,10 +114,11 @@ public class PermissionCommand {
                    }
                    component
                            .append(Component.text("Hérité du rang "))
-                           .append(rank.name()).color(rank.getColor())
+                           .append(rank.name()).color(rank.color())
                            .resetStyle()
                            .append(Component.newline());
                    component.append(Component.join(JoinConfiguration.newlines(), permissions.stream().map(permission -> Component.text(permission.getPermission())).toList()));
+                   component.append(Component.newline());
                 });
             }
 
