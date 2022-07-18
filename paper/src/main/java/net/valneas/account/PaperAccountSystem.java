@@ -13,27 +13,33 @@ import net.valneas.account.commands.arguments.BooleanArgument;
 import net.valneas.account.commands.arguments.PermissionArgument;
 import net.valneas.account.listener.*;
 import net.valneas.account.mongo.Mongo;
-import net.valneas.account.permission.Permission;
-import net.valneas.account.permission.PermissionDatabase;
-import net.valneas.account.permission.PermissionDispatcher;
+import net.valneas.account.permission.PaperPermission;
+import net.valneas.account.permission.PaperPermissionDatabase;
+import net.valneas.account.permission.PaperPermissionDispatcher;
+import net.valneas.account.provider.AccountSystemApiProvider;
+import net.valneas.account.rank.PaperRankHandler;
 import net.valneas.account.rank.RankHandler;
+import net.valneas.account.rank.RankManager;
+import net.valneas.account.rank.RankUnit;
 import net.valneas.account.util.MongoUtil;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.greenrobot.eventbus.EventBus;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 
-public class AccountSystem extends JavaPlugin {
+public class PaperAccountSystem extends JavaPlugin implements AccountSystemApi {
 
     private Mongo mongo;
     private MongoUtil mongoUtil;
     private @Getter Datastore datastore;
-    private @Getter RankHandler rankHandler;
-    private PermissionDatabase permissionDatabase;
-    private PermissionDispatcher permissionDispatcher;
-
+    private PaperRankHandler rankHandler;
+    private PaperPermissionDatabase permissionDatabase;
+    private PaperPermissionDispatcher permissionDispatcher;
     /**
      * This field will be used to choose between finding the player in the whole proxy
      * and send him a message or if the server is not linked
@@ -59,10 +65,10 @@ public class AccountSystem extends JavaPlugin {
         mongoUtil = new MongoUtil(this);
 
         this.datastore = new MorphiaInitializer(this.getClass(), mongo.getMongoClient(), getConfig().getString("mongodb.database"), new String[]{"net.valneas.account", "net.valneas.account.rank"}).getDatastore();
-        this.rankHandler = new RankHandler(datastore);
+        this.rankHandler = new PaperRankHandler(datastore);
 
-        permissionDatabase = new PermissionDatabase(this);
-        permissionDispatcher = new PermissionDispatcher(this);
+        permissionDatabase = new PaperPermissionDatabase(this);
+        permissionDispatcher = new PaperPermissionDispatcher(this);
 
         this.permissionDispatcher.onEnable();
 
@@ -79,16 +85,21 @@ public class AccountSystem extends JavaPlugin {
             getLogger().info("---------------------------------------------");
         }
 
+        EventBus.getDefault().register(new MajorRankChangedListener(this));
+        EventBus.getDefault().register(new RankAddedListener(this));
+        EventBus.getDefault().register(new RankRemovedListener(this));
+
         registerEvents();
         getCommand("rank").setExecutor(new RankCommand(this));
         getCommand("account").setExecutor(new AccountCommand(this));
-        DefaultInferenceProvider.getGlobal().register(Permission.class, new PermissionArgument());
+        DefaultInferenceProvider.getGlobal().register(PaperPermission.class, new PermissionArgument());
         DefaultInferenceProvider.getGlobal().register(boolean.class, new BooleanArgument());
 
         new CommandBuilder().infer(new PermissionCommand(this)).build(new ReflectionCommandCallback(new PermissionCommand(this)), getCommand("permission"));
         new CommandBuilder().infer(new SetDefaultCommand(this)).build(new ReflectionCommandCallback(new SetDefaultCommand(this)), getCommand("setdefault"));
 
-        getServer().getServicesManager().register(AccountSystem.class, this, this, ServicePriority.Normal);
+        registerAccountSystemService();
+        registerRankHandlerService();
         getLogger().info("Enabled!");
     }
 
@@ -98,10 +109,7 @@ public class AccountSystem extends JavaPlugin {
     private void registerEvents() {
         registerListeners(
                 new PlayerJoinListener(this),
-                new PlayerQuitListener(this),
-                new MajorRankChangedListener(this),
-                new RankAddedListener(this),
-                new RankRemovedListener(this)
+                new PlayerQuitListener(this)
         );
     }
 
@@ -131,11 +139,13 @@ public class AccountSystem extends JavaPlugin {
         return mongoUtil;
     }
 
-    public PermissionDatabase getPermissionDatabase() {
+    public PaperPermissionDatabase getPermissionDatabase() {
         return permissionDatabase;
     }
 
-    public PermissionDispatcher getPermissionDispatcher() {
+    @Override
+    @NotNull
+    public PaperPermissionDispatcher getPermissionDispatcher() {
         return permissionDispatcher;
     }
 
@@ -145,5 +155,33 @@ public class AccountSystem extends JavaPlugin {
      */
     public boolean isBungeeMode() {
         return bungeeMode;
+    }
+
+    @NotNull
+    @Override
+    public <T extends RankUnit> RankHandler<T> getRankHandler() {
+        return (RankHandler<T>) this.rankHandler;
+    }
+
+    @NotNull
+    @Override
+    public <A extends AbstractAccount, R extends RankManager<? extends RankUnit>, T> AccountManager<A, R> getAccountManager(T playerType) {
+        if(playerType instanceof Player player){
+            return (AccountManager<A, R>) new PaperAccountManager(this, player);
+        }else{
+            throw new IllegalArgumentException("Wrong player type for this platform.");
+        }
+    }
+
+    @Override
+    public void registerAccountSystemService() {
+        AccountSystemApiProvider.register(this);
+        getServer().getServicesManager().register(AccountSystemApi.class, this, this, ServicePriority.Normal);
+    }
+
+    @Override
+    public void registerRankHandlerService() {
+        AccountSystemApiProvider.register(this.rankHandler);
+        getServer().getServicesManager().register(RankHandler.class, this.rankHandler, this, ServicePriority.Normal);
     }
 }
