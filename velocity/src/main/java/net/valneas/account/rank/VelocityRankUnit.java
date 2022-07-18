@@ -19,15 +19,15 @@ public class VelocityRankUnit extends AbstractRankUnit {
         return Component.text(name);
     }
 
-    public Component getPrefix() {
+    public Component prefix() {
         return MiniMessage.miniMessage().deserialize(prefix);
     }
 
-    public Component getSuffix() {
+    public Component suffix() {
         return MiniMessage.miniMessage().deserialize(suffix);
     }
 
-    public NamedTextColor getColor() {
+    public NamedTextColor color() {
         return NamedTextColor.NAMES.value(color);
     }
 }
