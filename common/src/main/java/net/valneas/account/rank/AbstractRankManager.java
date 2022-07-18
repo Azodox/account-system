@@ -12,13 +12,15 @@ import java.util.List;
 /**
  * @author Azodox_ (Luke)
  * 5/6/2022.
+ * @param <E> The type of account manager.
+ * @param <T> The type of rank unit.
  */
 
-public abstract class AbstractRankManager<T extends AbstractRankUnit> {
+public abstract class AbstractRankManager<E extends AbstractAccountManager<?>, T extends AbstractRankUnit & RankUnit> implements RankManager<T> {
 
-    protected final AbstractAccountManager accountManager;
+    protected final E accountManager;
 
-    public AbstractRankManager(AbstractAccountManager accountManager) {
+    public AbstractRankManager(E accountManager) {
         this.accountManager = accountManager;
     }
 
@@ -26,11 +28,6 @@ public abstract class AbstractRankManager<T extends AbstractRankUnit> {
         return accountManager.getAccountQuery().update(UpdateOperators.set("major-rank", rankPower)).execute();
     }
 
-    /**
-     * Add a rank to the account. This method won't call any events.
-     * @param rankPower The rank power of the rank to add.
-     * @return The result of the update.
-     */
     public UpdateResult addRank(int rankPower){
         return accountManager.getAccountQuery().update(UpdateOperators.addToSet("ranks", rankPower)).execute();
     }
