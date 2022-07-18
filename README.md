@@ -8,7 +8,6 @@ My original account system to manage accounts on a minecraft server.
 Maven :
 ```xml
 <dependencies>
-<!-- AccountSystem for Paper (if you wish to use another one simply replace "paper" by something else (e.g. velocity)) -->
     <dependency>
         <groupId>io.github.azodox</groupId>
         <artifactId>accountsystem-api</artifactId>
