@@ -1,28 +1,28 @@
 package net.valneas.account.listener;
 
 import io.github.leonardosnt.bungeechannelapi.BungeeChannelApi;
-import net.valneas.account.AccountSystem;
+import net.valneas.account.PaperAccountSystem;
 import net.valneas.account.events.rank.RankAddedEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
+import org.greenrobot.eventbus.Subscribe;
 
-public class RankAddedListener implements Listener {
+public class RankAddedListener {
 
-    private final AccountSystem main;
+    private final PaperAccountSystem main;
 
-    public RankAddedListener(AccountSystem main) {
+    public RankAddedListener(PaperAccountSystem main) {
         this.main = main;
     }
 
-    @EventHandler
-    public void onRankAdded(RankAddedEvent e){
-        final var account = e.getAccount();
+    @Subscribe
+    public void onRankAdded(RankAddedEvent<CommandSender> event) {
+        final var account = event.getAccountManager();
 
         String message = ChatColor.YELLOW + "" + ChatColor.ITALIC + "Michel §r§l➔ " + ChatColor.YELLOW +
-                "Youpiii on vient de t'ajouter le rang §r" + ChatColor.BOLD + e.getRankAdded().getName() + ChatColor.YELLOW +
+                "Youpiii on vient de t'ajouter le rang §r" + ChatColor.BOLD + main.getRankHandler().getById(event.getRankId()).first().getName() + ChatColor.YELLOW +
                 "! Profitez-en bien";
 
         if(main.isBungeeMode()){
@@ -41,7 +41,7 @@ public class RankAddedListener implements Listener {
             }
         }
 
-        e.getSender().sendMessage(
+        event.getSender().sendMessage(
                 ChatColor.YELLOW + "" + ChatColor.ITALIC + "Michel §r§l➔ " + ChatColor.YELLOW +
                         "Message transmit et rang changé ✔"
         );

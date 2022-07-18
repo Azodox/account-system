@@ -1,30 +1,32 @@
 package net.valneas.account.listener;
 
 import io.github.leonardosnt.bungeechannelapi.BungeeChannelApi;
-import net.valneas.account.AccountSystem;
+import net.valneas.account.PaperAccountSystem;
 import net.valneas.account.events.rank.MajorRankChangedEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
+import org.greenrobot.eventbus.Subscribe;
 
-public class MajorRankChangedListener implements Listener {
+public class MajorRankChangedListener {
 
-    private final AccountSystem main;
+    private final PaperAccountSystem main;
 
-    public MajorRankChangedListener(AccountSystem main) {
+    public MajorRankChangedListener(PaperAccountSystem main) {
         this.main = main;
     }
 
-    @EventHandler
-    public void onMajorRankChanged(MajorRankChangedEvent e){
-        final var account = e.getAccount();
+    @Subscribe
+    public void onMajorRankChange(MajorRankChangedEvent<CommandSender> event) {
+        final var account = event.getAccountManager();
 
         String message = ChatColor.YELLOW + "" + ChatColor.ITALIC + "Michel §r§l➔ " + ChatColor.YELLOW +
-                "Hey, on m'a dit de te dire que ton rang majeur a changé. Donc tu passes du rang §r" + ChatColor.BOLD + e.getPreviousMajorRank().getName() +
-                ChatColor.YELLOW + " à §r" + ChatColor.BOLD + e.getNewMajorRank().getName() + ChatColor.YELLOW +
-                ". Voilà, passe une bonne journée !";
+                "Hey, on m'a dit de te dire que ton rang majeur a changé. Donc tu passes du rang §r" + ChatColor.BOLD
+                + main.getRankHandler().getById(event.getPreviousRankId()).first().getName()
+                + ChatColor.YELLOW + " à §r" + ChatColor.BOLD + main.getRankHandler().getById(event.getNewRankId()).first().getName()
+                + ChatColor.YELLOW
+                + ". Voilà, passe une bonne journée !";
 
         if(main.isBungeeMode()){
             final BungeeChannelApi api = BungeeChannelApi.of(main);
@@ -42,9 +44,9 @@ public class MajorRankChangedListener implements Listener {
             }
         }
 
-        e.getSender().sendMessage(
+        event.getSender().sendMessage(
                 ChatColor.YELLOW + "" + ChatColor.ITALIC + "Michel §r§l➔ " + ChatColor.YELLOW +
-                "Message transmit et rang changé ✔"
+                        "Message transmit et rang changé ✔"
         );
     }
 }
