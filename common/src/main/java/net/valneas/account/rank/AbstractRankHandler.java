@@ -10,7 +10,7 @@ import dev.morphia.query.experimental.filters.Filters;
  * 5/6/2022.
  */
 
-public abstract class AbstractRankHandler<T extends AbstractRankUnit> {
+public abstract class AbstractRankHandler<T extends AbstractRankUnit & RankUnit> implements RankHandler<T> {
 
     protected final Datastore datastore;
     protected final Class<T> clazz;
@@ -20,11 +20,13 @@ public abstract class AbstractRankHandler<T extends AbstractRankUnit> {
         this.clazz = clazz;
     }
 
+    @Override
     public Query<T> getAllRanksQuery(){
         return this.datastore.find(this.clazz);
     }
 
 
+    @Override
     public T getDefaultRank(){
         var defaultRank = this.datastore.find(this.clazz).filter(Filters.eq("default", true)).first();
         if(defaultRank == null){
@@ -34,18 +36,22 @@ public abstract class AbstractRankHandler<T extends AbstractRankUnit> {
         return defaultRank;
     }
 
+    @Override
     public Query<T> getById(int id){
         return this.datastore.find(this.clazz).filter(Filters.eq("id", id));
     }
 
+    @Override
     public Query<T> getByPower(int power){
         return this.datastore.find(this.clazz).filter(Filters.eq("power", power));
     }
 
+    @Override
     public Query<T> getByName(String name){
         return this.datastore.find(this.clazz).filter(Filters.eq("name", name));
     }
 
+    @Override
     public Query<T> getByCommandArg(String arg){
         try{
             int i = Integer.parseInt(arg);
