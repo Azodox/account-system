@@ -7,7 +7,7 @@ import dev.morphia.Datastore;
  * 19/6/2022.
  */
 
-public class VelocityRankHandler extends AbstractRankHandler<VelocityRankUnit>{
+public class VelocityRankHandler extends AbstractRankHandler<VelocityRankUnit> {
     public VelocityRankHandler(Datastore datastore) {
         super(datastore, VelocityRankUnit.class);
     }
