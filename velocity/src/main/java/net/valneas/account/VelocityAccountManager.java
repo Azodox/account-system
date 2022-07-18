@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * 14/5/2022.
  */
 
-public class VelocityAccountManager extends AbstractAccountManager {
+public class VelocityAccountManager extends AbstractAccountManager<VelocityRankManager> {
 
     private final VelocityAccountSystem plugin;
 
