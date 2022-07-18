@@ -4,15 +4,20 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.valneas.account.AccountManager;
-import net.valneas.account.AccountSystem;
-import net.valneas.account.rank.RankUnit;
+import net.valneas.account.PaperAccountManager;
+import net.valneas.account.PaperAccountSystem;
+import net.valneas.account.rank.AbstractRankHandler;
+import net.valneas.account.rank.AbstractRankUnit;
+import net.valneas.account.rank.PaperRankHandler;
+import net.valneas.account.rank.PaperRankUnit;
 import net.valneas.account.util.PlayerUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.Comparator;
 
 /**
  * The rank command class.
@@ -21,9 +26,9 @@ import org.bukkit.entity.Player;
  */
 public class RankCommand implements CommandExecutor {
 
-    private final AccountSystem main;
+    private final PaperAccountSystem main;
 
-    public RankCommand(AccountSystem main) {
+    public RankCommand(PaperAccountSystem main) {
         this.main = main;
     }
 
@@ -35,7 +40,7 @@ public class RankCommand implements CommandExecutor {
          * to execute this command.
          */
         if(sender instanceof Player player){
-            final var account = new AccountManager(main, player);
+            final var account = new PaperAccountManager(main, player);
             final var rank = account.newRankManager();
             if(!account.getAccount().isSuperUser()){
                 player.sendMessage(ChatColor.RED + "Erreur : Vous n'avez pas la permission.");
@@ -68,18 +73,18 @@ public class RankCommand implements CommandExecutor {
                 /*
                  * Trying to get the account of the potential player put in the first arg.
                  */
-                final AccountManager account;
+                final PaperAccountManager account;
 
                 if (PlayerUtil.ArgIsAnUuid(args[1])) {
-                    if (AccountManager.existsByUUID(args[1])) {
-                        account = new AccountManager(main, AccountManager.getNameByUuid(args[1]), args[1]);
+                    if (PaperAccountManager.existsByUUID(args[1])) {
+                        account = new PaperAccountManager(main, PaperAccountManager.getNameByUuid(args[1]), args[1]);
                     } else {
                         sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                         return true;
                     }
                 } else {
-                    if (AccountManager.existsByName(args[1])) {
-                        account = new AccountManager(main, args[1], AccountManager.getUuidByName(args[1]));
+                    if (PaperAccountManager.existsByName(args[1])) {
+                        account = new PaperAccountManager(main, args[1], PaperAccountManager.getUuidByName(args[1]));
                     } else {
                         sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                         return true;
@@ -120,7 +125,7 @@ public class RankCommand implements CommandExecutor {
                      * Add the ranks in the message builder.
                      */
                     if (rank.hasRanks()) {
-                        for (RankUnit r : rank.getRanks().stream().map(r -> (RankUnit) r).toList()) {
+                        for (PaperRankUnit r : rank.getRanks().stream().sorted(Comparator.comparingInt(AbstractRankUnit::getPower)).toList()) {
                             sb.append("§f- " + ChatColor.GRAY + r.getName() + ChatColor.DARK_GRAY + " (" + ChatColor.GOLD + "Id §f: " + ChatColor.GOLD +
                                     r.getId() + ChatColor.DARK_GRAY + ")\n");
                         }
@@ -155,18 +160,18 @@ public class RankCommand implements CommandExecutor {
                     /*
                      * Trying to get the account of the potential player put in the first arg.
                      */
-                    final AccountManager account;
+                    final PaperAccountManager account;
 
                     if (PlayerUtil.ArgIsAnUuid(args[1])) {
-                        if (AccountManager.existsByUUID(args[1])) {
-                            account = new AccountManager(main, AccountManager.getNameByUuid(args[1]), args[1]);
+                        if (PaperAccountManager.existsByUUID(args[1])) {
+                            account = new PaperAccountManager(main, PaperAccountManager.getNameByUuid(args[1]), args[1]);
                         } else {
                             sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                             return true;
                         }
                     } else {
-                        if (AccountManager.existsByName(args[1])) {
-                            account = new AccountManager(main, args[1], AccountManager.getUuidByName(args[1]));
+                        if (PaperAccountManager.existsByName(args[1])) {
+                            account = new PaperAccountManager(main, args[1], PaperAccountManager.getUuidByName(args[1]));
                         } else {
                             sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                             return true;
@@ -182,9 +187,9 @@ public class RankCommand implements CommandExecutor {
                         /*
                          * If the rank is null.
                          */
-                        final RankUnit rankUnit = (RankUnit) main.getRankHandler().getByCommandArg(args[2]).first();
+                        final PaperRankUnit rankUnit = (PaperRankUnit) main.getRankHandler().getByCommandArg(args[2]).first();
                         if (rankUnit == null) {
-                            sender.sendMessage(Component.text("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n").append(main.getRankHandler().getRankList()));
+                            sender.sendMessage(Component.text("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n").append(this.getRankList()));
                             return true;
                         }
 
@@ -200,7 +205,7 @@ public class RankCommand implements CommandExecutor {
                          * Add the rank to the player
                          * and call the event.
                          */
-                        rank.addRank(rankUnit, sender, true);
+                        rank.addRank(rankUnit.getId(), sender, true);
                     } else {
                         /*
                          * If the account doesn't exists.
@@ -232,18 +237,18 @@ public class RankCommand implements CommandExecutor {
                         return true;
                     }
 
-                    final AccountManager account;
+                    final PaperAccountManager account;
 
                     if (PlayerUtil.ArgIsAnUuid(args[1])) {
-                        if (AccountManager.existsByUUID(args[1])) {
-                            account = new AccountManager(main, AccountManager.getNameByUuid(args[1]), args[1]);
+                        if (PaperAccountManager.existsByUUID(args[1])) {
+                            account = new PaperAccountManager(main, PaperAccountManager.getNameByUuid(args[1]), args[1]);
                         } else {
                             sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                             return true;
                         }
                     } else {
-                        if (AccountManager.existsByName(args[1])) {
-                            account = new AccountManager(main, args[1], AccountManager.getUuidByName(args[1]));
+                        if (PaperAccountManager.existsByName(args[1])) {
+                            account = new PaperAccountManager(main, args[1], PaperAccountManager.getUuidByName(args[1]));
                         } else {
                             sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                             return true;
@@ -253,9 +258,9 @@ public class RankCommand implements CommandExecutor {
                     if (account.hasAnAccount()) {
                         final var rank = account.newRankManager();
 
-                        final RankUnit rankUnit = (RankUnit) main.getRankHandler().getByCommandArg(args[2]).first();
+                        final PaperRankUnit rankUnit = (PaperRankUnit) main.getRankHandler().getByCommandArg(args[2]).first();
                         if (rankUnit == null) {
-                            sender.sendMessage(Component.text("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n").append(main.getRankHandler().getRankList()));
+                            sender.sendMessage(Component.text("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n").append(this.getRankList()));
                             return true;
                         }
 
@@ -264,7 +269,7 @@ public class RankCommand implements CommandExecutor {
                             return true;
                         }
 
-                        rank.removeRank(rankUnit, sender, true);
+                        rank.removeRank(rankUnit.getId(), sender, true);
                     } else {
                         sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                         return true;
@@ -283,18 +288,18 @@ public class RankCommand implements CommandExecutor {
                         return true;
                     }
 
-                    final AccountManager account;
+                    final PaperAccountManager account;
 
                     if (PlayerUtil.ArgIsAnUuid(args[1])) {
-                        if (AccountManager.existsByUUID(args[1])) {
-                            account = new AccountManager(main, AccountManager.getNameByUuid(args[1]), args[1]);
+                        if (PaperAccountManager.existsByUUID(args[1])) {
+                            account = new PaperAccountManager(main, PaperAccountManager.getNameByUuid(args[1]), args[1]);
                         } else {
                             sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                             return true;
                         }
                     } else {
-                        if (AccountManager.existsByName(args[1])) {
-                            account = new AccountManager(main, args[1], AccountManager.getUuidByName(args[1]));
+                        if (PaperAccountManager.existsByName(args[1])) {
+                            account = new PaperAccountManager(main, args[1], PaperAccountManager.getUuidByName(args[1]));
                         } else {
                             sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                             return true;
@@ -304,9 +309,9 @@ public class RankCommand implements CommandExecutor {
                     if (account.hasAnAccount()) {
                         final var rank = account.newRankManager();
 
-                        final RankUnit rankUnit = (RankUnit) main.getRankHandler().getByCommandArg(args[2]).first();
+                        final PaperRankUnit rankUnit = (PaperRankUnit) main.getRankHandler().getByCommandArg(args[2]).first();
                         if (rankUnit == null) {
-                            sender.sendMessage(Component.text("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n").append(main.getRankHandler().getRankList()));
+                            sender.sendMessage(Component.text("Le rang ne peut pas etre null !\nVoici la liste des rangs :\n").append(this.getRankList()));
                             return true;
                         }
 
@@ -323,7 +328,7 @@ public class RankCommand implements CommandExecutor {
                             rank.removeRank(main.getRankHandler().getDefaultRank().getId());
                         }
 
-                        rank.setMajorRank(rankUnit, sender, true);
+                        rank.setMajorRank(rankUnit.getId(), sender, true);
                     } else {
                         sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                         return true;
@@ -342,7 +347,7 @@ public class RankCommand implements CommandExecutor {
 
             sender.sendMessage(
                     Component.text("                                                \n").color(NamedTextColor.DARK_GRAY).decorate(TextDecoration.STRIKETHROUGH)
-                            .append(main.getRankHandler().getRankList()).style(Style.empty())
+                            .append(this.getRankList()).style(Style.empty())
                             .append(Component.text("\n                                                ").color(NamedTextColor.DARK_GRAY).decorate(TextDecoration.STRIKETHROUGH)));
         }
 
@@ -351,5 +356,9 @@ public class RankCommand implements CommandExecutor {
 
     private String getUsageMessage() {
         return "/rank [add/remove/set/show] [joueur] [rang]";
+    }
+
+    private Component getRankList(){
+        return ((PaperRankHandler) ((AbstractRankHandler<?>) main.getRankHandler())).getRankList();
     }
 }
