@@ -1,8 +1,8 @@
 package net.valneas.account.listener;
 
 import dev.morphia.query.experimental.updates.UpdateOperators;
-import net.valneas.account.AccountManager;
-import net.valneas.account.AccountSystem;
+import net.valneas.account.PaperAccountManager;
+import net.valneas.account.PaperAccountSystem;
 import net.valneas.account.util.PlayerUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,16 +17,16 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 public class PlayerJoinListener implements Listener {
 
-    private final AccountSystem main;
+    private final PaperAccountSystem main;
 
-    public PlayerJoinListener(AccountSystem main) {
+    public PlayerJoinListener(PaperAccountSystem main) {
         this.main = main;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onJoin(PlayerJoinEvent e){
         Player player = e.getPlayer();
-        var accountManager = new AccountManager(main, player);
+        var accountManager = new PaperAccountManager(main, player);
 
         long current = System.currentTimeMillis();
 
