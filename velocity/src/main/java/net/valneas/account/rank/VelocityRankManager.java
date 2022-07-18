@@ -1,6 +1,8 @@
 package net.valneas.account.rank;
 
 import com.google.common.base.Preconditions;
+import com.google.errorprone.annotations.DoNotCall;
+import com.mongodb.client.result.UpdateResult;
 import net.valneas.account.VelocityAccountManager;
 
 import java.util.List;
@@ -11,13 +13,31 @@ import java.util.Objects;
  * 19/6/2022.
  */
 
-public class VelocityRankManager extends AbstractRankManager<VelocityRankUnit> {
+public class VelocityRankManager extends AbstractRankManager<VelocityAccountManager, VelocityRankUnit> {
 
     private final VelocityRankHandler rankHandler;
 
     public VelocityRankManager(VelocityRankHandler rankHandler, VelocityAccountManager accountManager) {
         super(accountManager);
         this.rankHandler = rankHandler;
+    }
+
+    @Override
+    @DoNotCall("This method is not available on Velocity platform.")
+    public <E> UpdateResult setMajorRank(int rankId, E sender, boolean event) {
+        return null;
+    }
+
+    @Override
+    @DoNotCall("This method is not available on Velocity platform.")
+    public <E> UpdateResult addRank(int rankId, E sender, boolean event) {
+        return null;
+    }
+
+    @Override
+    @DoNotCall("This method is not available on Velocity platform.")
+    public <E> UpdateResult removeRank(int rankPower, E sender, boolean event) {
+        return null;
     }
 
     @Override
