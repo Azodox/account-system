@@ -6,35 +6,33 @@ plugins {
 }
 
 group 'net.valneas'
-version '0.5.1-SNAPSHOT'
+version '0.6.1'
 
 repositories {
     mavenLocal()
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    apiElements 'com.google.guava:guava:31.1-jre'
     apiElements 'dev.morphia.morphia:morphia-core:2.2.7'
     apiElements 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
 }
 
 subprojects {
-    apply plugin: 'maven-publish'
-    apply plugin: 'signing'
-
     ext {
         pluginName = ''
     }
 
     afterEvaluate {
-        shadowJar {
-            archivesBaseName = pluginName
+        repositories {
+            maven { url 'https://jitpack.io' }
         }
 
         dependencies {
             implementation 'dev.morphia.morphia:morphia-core:2.2.7'
+            implementation 'org.greenrobot:eventbus-java:3.3.1'
             annotationProcessor 'org.projectlombok:lombok:1.18.24'
         }
 
@@ -44,53 +42,10 @@ subprojects {
             }
         }
 
-        publishing {
-            publications {
-                shadow(MavenPublication) { publication ->
-                    groupId = 'io.github.azodox'
-                    artifactId = pluginName
-                    version = version /*+ '-SNAPSHOT'*/
-                    project.shadow.component(publication)
-
-                    pom {
-                        description = 'My original way to manage accounts on a minecraft server.'
-                        url = 'https://github.com/Azodox/account-system'
-
-                        licenses {
-                            license {
-                                name = 'MIT License'
-                                url = 'http://www.opensource.org/licenses/mit-license.php'
-                            }
-                        }
-                        developers {
-                            developer {
-                                id = 'Azodox_'
-                                name = 'Azodox_'
-                            }
-                        }
-                        scm {
-                            connection = 'https://github.com/Azodox/account-system.git'
-                            developerConnection = 'https://github.com/Azodox/account-system.git'
-                            url = 'https://github.com/Azodox/account-system'
-                        }
-                    }
-                }
-            }
-
-            repositories {
-                maven {
-                    url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
-
-                    credentials {
-                        username = findProperty("centralUser")
-                        password = findProperty("centralPassword")
-                    }
-                }
-            }
-        }
-
-        signing {
-            sign publishing.publications.shadow
+        shadowJar {
+            archivesBaseName = pluginName
+            archiveClassifier.set('')
+            relocate 'org.greenrobot.eventbus', 'net.valneas.account.lib.eventbus'
         }
     }
 }
