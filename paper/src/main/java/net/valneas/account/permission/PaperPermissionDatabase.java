@@ -1,8 +1,8 @@
 package net.valneas.account.permission;
 
-import net.valneas.account.AccountManager;
-import net.valneas.account.AccountSystem;
-import net.valneas.account.rank.RankUnit;
+import net.valneas.account.PaperAccountManager;
+import net.valneas.account.PaperAccountSystem;
+import net.valneas.account.rank.PaperRankUnit;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
@@ -13,17 +13,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class PermissionDatabase extends AbstractPermissionDatabase<Permission> {
+public class PaperPermissionDatabase extends AbstractPermissionDatabase<PaperPermission> {
 
-    private final AccountSystem accountSystem;
+    private final PaperAccountSystem accountSystem;
 
-    public PermissionDatabase(AccountSystem accountSystem){
-        super(accountSystem.getDatastore(), Permission.class);
+    public PaperPermissionDatabase(PaperAccountSystem accountSystem){
+        super(accountSystem.getDatastore(), PaperPermission.class);
         this.accountSystem = accountSystem;
     }
 
     public void setPlayerPermission(Player player){
-        var account = new AccountManager(this.accountSystem, player);
+        var account = new PaperAccountManager(this.accountSystem, player);
         var rank = account.newRankManager();
 
         player.getEffectivePermissions()
@@ -31,7 +31,7 @@ public class PermissionDatabase extends AbstractPermissionDatabase<Permission> {
                 .toList().stream().filter(Objects::nonNull).forEach(PermissionAttachment::remove);
 
 
-        List<Permission> permissions = new ArrayList<>();
+        List<PaperPermission> permissions = new ArrayList<>();
 
         permissions.addAll(this.getRankPermissions(rank.getMajorRank()));
         rank.getRanks().forEach(rankUnit -> permissions.addAll(this.getRankPermissions(rankUnit)));
@@ -41,7 +41,7 @@ public class PermissionDatabase extends AbstractPermissionDatabase<Permission> {
         permissions.forEach(permission -> attachment.setPermission(permission.getPermission().replace("-", ""), !permission.getPermission().startsWith("-")));
     }
 
-    public List<Permission> getRankPermissions(RankUnit rank){
+    public List<PaperPermission> getRankPermissions(PaperRankUnit rank){
         return this.getPermissions().stream()
                 .filter(permission -> permission.getRanksIds().contains(rank.getId())).filter(permission -> {
             if(permission.getExceptions() == null)
@@ -50,7 +50,7 @@ public class PermissionDatabase extends AbstractPermissionDatabase<Permission> {
         }).toList();
     }
 
-    public List<Permission> getUUIDPermissions(UUID uuid){
+    public List<PaperPermission> getUUIDPermissions(UUID uuid){
         return this.getPermissions().stream().filter(permission -> {
             if(permission.getPlayers() == null)
                 return false;
@@ -62,7 +62,7 @@ public class PermissionDatabase extends AbstractPermissionDatabase<Permission> {
         }).toList();
     }
 
-    public List<Permission> getDefaultPermissions(UUID uuid){
+    public List<PaperPermission> getDefaultPermissions(UUID uuid){
         return this.getPermissions().stream().filter(AbstractPermission::isDefault).filter(permission -> {
             if(permission.getPlayers() == null)
                 return true;
@@ -76,9 +76,9 @@ public class PermissionDatabase extends AbstractPermissionDatabase<Permission> {
 
     public static class DatabaseParser {
 
-        private final AccountSystem accountSystem;
+        private final PaperAccountSystem accountSystem;
 
-        public DatabaseParser(AccountSystem accountSystem) {
+        public DatabaseParser(PaperAccountSystem accountSystem) {
             this.accountSystem = accountSystem;
         }
 
@@ -103,8 +103,8 @@ public class PermissionDatabase extends AbstractPermissionDatabase<Permission> {
         public static String parse(Object value){
             if(value == null) return null;
 
-            if(value instanceof RankUnit){
-                return String.valueOf(((RankUnit) value).getId());
+            if(value instanceof PaperRankUnit){
+                return String.valueOf(((PaperRankUnit) value).getId());
             } else if(value instanceof UUID){
                 return value.toString();
             } else {
