@@ -18,7 +18,6 @@ public abstract class AbstractAccountManager<T extends AbstractRankManager<?, ?>
         this.uuid = uuid;
     }
 
-    @Override
     public abstract void createAccount(int defaultRankId);
 
     @Override
@@ -26,7 +25,6 @@ public abstract class AbstractAccountManager<T extends AbstractRankManager<?, ?>
         return this.datastore.find(Account.class).filter(Filters.eq("uuid", uuid)).count() != 0;
     }
 
-    @Override
     public void updateOnLogin(){
         if(!hasAnAccount()) return;
         var query = getAccountQuery();
