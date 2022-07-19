@@ -52,9 +52,6 @@ public abstract class AbstractRankManager<E extends AbstractAccountManager<?>, T
         return this.hasExactMajorRank(rankId) || this.hasExactRank(rankId);
     }
 
-    public abstract boolean hasRank(int rankPower);
-    public abstract boolean hasAtLeast(int rankPower);
-
     public boolean hasMajorRank(){
         return accountManager.getAccountQuery().filter(Filters.exists("major-rank")).count() != 0;
     }
