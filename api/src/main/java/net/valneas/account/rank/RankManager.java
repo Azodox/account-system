@@ -29,6 +29,7 @@ public interface RankManager<T extends RankUnit> {
     boolean hasExactRank(int rankId);
     boolean hasExactMajorOrNotRank(int rankId);
     boolean hasRank(int rankPower);
+    boolean hasAtLeast(int rankPower);
     T getMajorRank();
     List<T> getRanks();
 }
