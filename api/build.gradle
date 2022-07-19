@@ -57,8 +57,8 @@ publishing {
     repositories {
         maven {
             //Snapshot repo : 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
-            //Release repo : 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
-            url 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            //Release repo : 'https://s01.oss.sonatype.org/content/repositories/releases/'
+            url 'https://s01.oss.sonatype.org/content/repositories/releases/'
 
             credentials {
                 username = findProperty("centralUser")

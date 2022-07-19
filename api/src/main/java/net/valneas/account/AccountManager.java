@@ -13,9 +13,7 @@ import net.valneas.account.rank.RankUnit;
 
 public interface AccountManager<T extends AbstractAccount, E extends RankManager<? extends RankUnit>> {
 
-    void createAccount(int defaultRankId);
     boolean hasAnAccount();
-    void updateOnLogin();
     Query<T> getAccountQuery();
     T getAccount();
     String getName();
