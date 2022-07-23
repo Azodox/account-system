@@ -35,6 +35,8 @@ public class PaperAccountManager extends AbstractAccountManager<PaperRankManager
                 false,
                 0.0d,
                 0.0d,
+                0,
+                -1,
                 0.0d,
                 0.0d,
                 0.0d,

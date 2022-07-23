@@ -27,6 +27,8 @@ import java.util.List;
         @Index(fields = @Field("first-connection")),
         @Index(fields = @Field("farming-points")),
         @Index(fields = @Field("farming-prestige")),
+        @Index(fields = @Field("current-job")),
+        @Index(fields = @Field("last-job-change")),
         @Index(fields = @Field("points")),
         @Index(fields = @Field("super-user"))
 })
@@ -57,6 +59,12 @@ public abstract class AbstractAccount {
     @Property("farming-prestige")
     private @Getter final double farmingPrestige;
 
+    @Property("current-job")
+    private @Getter final int currentJobId;
+
+    @Property("last-job-change")
+    private @Getter final long lastJobChange;
+
     @Property
     private @Getter final double xp, level, money, points;
 
@@ -75,7 +83,7 @@ public abstract class AbstractAccount {
     @Property("super-user")
     private @Getter final boolean superUser;
 
-    public AbstractAccount(String uuid, String name, String lastIp, int majorRankId, boolean moderationMode, boolean vanish, double farmingPoints, double farmingPrestige, double xp, double level, double money, double points, List<Integer> ranksIds, long firstConnection, long lastConnection, long lastDisconnection, boolean superUser) {
+    public AbstractAccount(String uuid, String name, String lastIp, int majorRankId, boolean moderationMode, boolean vanish, double farmingPoints, double farmingPrestige, int currentJobId, long lastJobChange, double xp, double level, double money, double points, List<Integer> ranksIds, long firstConnection, long lastConnection, long lastDisconnection, boolean superUser) {
         this.uuid = uuid;
         this.name = name;
         this.lastIp = lastIp;
@@ -84,6 +92,8 @@ public abstract class AbstractAccount {
         this.vanish = vanish;
         this.farmingPoints = farmingPoints;
         this.farmingPrestige = farmingPrestige;
+        this.currentJobId = currentJobId;
+        this.lastJobChange = lastJobChange;
         this.xp = xp;
         this.level = level;
         this.money = money;

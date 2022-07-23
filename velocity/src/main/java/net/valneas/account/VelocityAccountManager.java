@@ -33,6 +33,8 @@ public class VelocityAccountManager extends AbstractAccountManager<VelocityRankM
                 false,
                 0.0d,
                 0.0d,
+                0,
+                -1,
                 0.0d,
                 0.0d,
                 0.0d,
