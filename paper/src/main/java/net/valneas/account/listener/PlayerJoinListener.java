@@ -4,7 +4,6 @@ import dev.morphia.query.experimental.updates.UpdateOperators;
 import net.valneas.account.PaperAccountManager;
 import net.valneas.account.PaperAccountSystem;
 import net.valneas.account.util.PlayerUtil;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -25,20 +24,22 @@ public class PlayerJoinListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onJoin(PlayerJoinEvent e){
-        Player player = e.getPlayer();
-        var accountManager = new PaperAccountManager(main, player);
+        var player = e.getPlayer();
+        var accountManager = new PaperAccountManager(main, player, main.getJedisPool());
 
         long current = System.currentTimeMillis();
 
-        if(!accountManager.hasAnAccount()){
+        var query = accountManager.getAccountQuery();
+
+        if(!accountManager.hasAnAccount()) {
             accountManager.initDefaultAccount();
-            accountManager.getAccountQuery().update(UpdateOperators.set("first-connection", current)).execute();
-        }else{
-            accountManager.updateOnLogin();
+            query.update(UpdateOperators.set("first-connection", current)).execute();
+            query.update(UpdateOperators.set("last-connection", current)).execute();
+            query.update(UpdateOperators.set("last-ip", PlayerUtil.getIp(player))).execute();
         }
 
-        accountManager.getAccountQuery().update(UpdateOperators.set("last-connection", current)).execute();
-        accountManager.getAccountQuery().update(UpdateOperators.set("last-ip", PlayerUtil.getIp(player))).execute();
         this.main.getPermissionDispatcher().set(player);
+
+        main.getCacheSaver().onJoin(accountManager.getAccount());
     }
 }
