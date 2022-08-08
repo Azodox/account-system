@@ -14,28 +14,12 @@ import java.util.List;
 @Entity(value = "accounts", discriminator = "account")
 @Indexes({
         @Index(fields = @Field("name")),
-        @Index(fields = @Field("uuid"), options = @IndexOptions(unique = true)),
-        @Index(fields = @Field("xp")),
-        @Index(fields = @Field("level")),
-        @Index(fields = @Field("money")),
-        @Index(fields = @Field("major-rank")),
-        @Index(fields = @Field("ranks")),
-        @Index(fields = @Field("moderation-mod")),
-        @Index(fields = @Field("last-ip")),
-        @Index(fields = @Field("last-connection")),
-        @Index(fields = @Field("last-disconnection")),
-        @Index(fields = @Field("first-connection")),
-        @Index(fields = @Field("farming-points")),
-        @Index(fields = @Field("farming-prestige")),
-        @Index(fields = @Field("current-job")),
-        @Index(fields = @Field("last-job-change")),
-        @Index(fields = @Field("points")),
-        @Index(fields = @Field("super-user"))
+        @Index(fields = @Field("uuid"), options = @IndexOptions(unique = true))
 })
 public abstract class AbstractAccount {
 
     @Id
-    private ObjectId _id;
+    private @Getter ObjectId _id;
 
     @Property
     private @Getter
@@ -84,6 +68,29 @@ public abstract class AbstractAccount {
     private @Getter final boolean superUser;
 
     public AbstractAccount(String uuid, String name, String lastIp, int majorRankId, boolean moderationMode, boolean vanish, double farmingPoints, double farmingPrestige, int currentJobId, long lastJobChange, double xp, double level, double money, double points, List<Integer> ranksIds, long firstConnection, long lastConnection, long lastDisconnection, boolean superUser) {
+        this.uuid = uuid;
+        this.name = name;
+        this.lastIp = lastIp;
+        this.majorRankId = majorRankId;
+        this.moderationMode = moderationMode;
+        this.vanish = vanish;
+        this.farmingPoints = farmingPoints;
+        this.farmingPrestige = farmingPrestige;
+        this.currentJobId = currentJobId;
+        this.lastJobChange = lastJobChange;
+        this.xp = xp;
+        this.level = level;
+        this.money = money;
+        this.points = points;
+        this.ranksIds = ranksIds;
+        this.firstConnection = firstConnection;
+        this.lastConnection = lastConnection;
+        this.lastDisconnection = lastDisconnection;
+        this.superUser = superUser;
+    }
+
+    public AbstractAccount(ObjectId _id, String uuid, String name, String lastIp, int majorRankId, boolean moderationMode, boolean vanish, double farmingPoints, double farmingPrestige, int currentJobId, long lastJobChange, double xp, double level, double money, double points, List<Integer> ranksIds, long firstConnection, long lastConnection, long lastDisconnection, boolean superUser) {
+        this._id = _id;
         this.uuid = uuid;
         this.name = name;
         this.lastIp = lastIp;
