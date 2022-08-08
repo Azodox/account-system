@@ -5,3 +5,9 @@ mongodb:
   password: ''
   database: minecraft
   authDatabase: minecraft
+
+redis:
+  host: localhost
+  port: 6379
+  user: ''
+  password: ''
