@@ -7,6 +7,7 @@ import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.connection.ClusterConnectionMode;
+import org.bson.UuidRepresentation;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -43,6 +44,7 @@ public class Mongo {
                     builder.readTimeout(30, TimeUnit.SECONDS);
                 })
                 .writeConcern(WriteConcern.ACKNOWLEDGED)
+                .uuidRepresentation(UuidRepresentation.STANDARD)
                 .credential(credential)
         .build();
 
