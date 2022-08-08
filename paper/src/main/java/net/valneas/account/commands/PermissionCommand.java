@@ -80,7 +80,7 @@ public class PermissionCommand {
     }
 
     public Component getUUIDShowMessage(UUID uuid){
-        var accountManager = new PaperAccountManager(this.accountSystem, null, uuid.toString());
+        var accountManager = new PaperAccountManager(this.accountSystem, null, uuid.toString(), accountSystem.getJedisPool());
         var rankManager = accountManager.newRankManager();
         var ranks = rankManager.getRanks();
 

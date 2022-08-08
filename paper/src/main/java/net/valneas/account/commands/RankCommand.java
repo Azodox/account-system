@@ -40,7 +40,7 @@ public class RankCommand implements CommandExecutor {
          * to execute this command.
          */
         if(sender instanceof Player player){
-            final var account = new PaperAccountManager(main, player);
+            final var account = new PaperAccountManager(main, player, main.getJedisPool());
             final var rank = account.newRankManager();
             if(!account.getAccount().isSuperUser()){
                 player.sendMessage(ChatColor.RED + "Erreur : Vous n'avez pas la permission.");
@@ -77,14 +77,14 @@ public class RankCommand implements CommandExecutor {
 
                 if (PlayerUtil.ArgIsAnUuid(args[1])) {
                     if (PaperAccountManager.existsByUUID(args[1])) {
-                        account = new PaperAccountManager(main, PaperAccountManager.getNameByUuid(args[1]), args[1]);
+                        account = new PaperAccountManager(main, PaperAccountManager.getNameByUuid(args[1]), args[1], main.getJedisPool());
                     } else {
                         sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                         return true;
                     }
                 } else {
                     if (PaperAccountManager.existsByName(args[1])) {
-                        account = new PaperAccountManager(main, args[1], PaperAccountManager.getUuidByName(args[1]));
+                        account = new PaperAccountManager(main, args[1], PaperAccountManager.getUuidByName(args[1]), main.getJedisPool());
                     } else {
                         sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                         return true;
@@ -164,14 +164,14 @@ public class RankCommand implements CommandExecutor {
 
                     if (PlayerUtil.ArgIsAnUuid(args[1])) {
                         if (PaperAccountManager.existsByUUID(args[1])) {
-                            account = new PaperAccountManager(main, PaperAccountManager.getNameByUuid(args[1]), args[1]);
+                            account = new PaperAccountManager(main, PaperAccountManager.getNameByUuid(args[1]), args[1], main.getJedisPool());
                         } else {
                             sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                             return true;
                         }
                     } else {
                         if (PaperAccountManager.existsByName(args[1])) {
-                            account = new PaperAccountManager(main, args[1], PaperAccountManager.getUuidByName(args[1]));
+                            account = new PaperAccountManager(main, args[1], PaperAccountManager.getUuidByName(args[1]), main.getJedisPool());
                         } else {
                             sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                             return true;
@@ -241,14 +241,14 @@ public class RankCommand implements CommandExecutor {
 
                     if (PlayerUtil.ArgIsAnUuid(args[1])) {
                         if (PaperAccountManager.existsByUUID(args[1])) {
-                            account = new PaperAccountManager(main, PaperAccountManager.getNameByUuid(args[1]), args[1]);
+                            account = new PaperAccountManager(main, PaperAccountManager.getNameByUuid(args[1]), args[1], main.getJedisPool());
                         } else {
                             sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                             return true;
                         }
                     } else {
                         if (PaperAccountManager.existsByName(args[1])) {
-                            account = new PaperAccountManager(main, args[1], PaperAccountManager.getUuidByName(args[1]));
+                            account = new PaperAccountManager(main, args[1], PaperAccountManager.getUuidByName(args[1]), main.getJedisPool());
                         } else {
                             sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                             return true;
@@ -292,14 +292,14 @@ public class RankCommand implements CommandExecutor {
 
                     if (PlayerUtil.ArgIsAnUuid(args[1])) {
                         if (PaperAccountManager.existsByUUID(args[1])) {
-                            account = new PaperAccountManager(main, PaperAccountManager.getNameByUuid(args[1]), args[1]);
+                            account = new PaperAccountManager(main, PaperAccountManager.getNameByUuid(args[1]), args[1], main.getJedisPool());
                         } else {
                             sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                             return true;
                         }
                     } else {
                         if (PaperAccountManager.existsByName(args[1])) {
-                            account = new PaperAccountManager(main, args[1], PaperAccountManager.getUuidByName(args[1]));
+                            account = new PaperAccountManager(main, args[1], PaperAccountManager.getUuidByName(args[1]), main.getJedisPool());
                         } else {
                             sender.sendMessage(ChatColor.RED + "Erreur : Ce compte n'existe pas.");
                             return true;
