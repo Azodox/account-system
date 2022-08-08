@@ -1,6 +1,5 @@
 package net.valneas.account.listener;
 
-import dev.morphia.query.experimental.updates.UpdateOperators;
 import net.valneas.account.PaperAccountManager;
 import net.valneas.account.PaperAccountSystem;
 import net.valneas.account.util.PlayerUtil;
@@ -20,11 +19,13 @@ public class PlayerQuitListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent e){
         Player player = e.getPlayer();
-        PaperAccountManager accountManager = new PaperAccountManager(main, player);
+        PaperAccountManager accountManager = new PaperAccountManager(main, player, main.getJedisPool());
+        var jedis = main.getJedisPool().getResource();
 
-        if(accountManager.hasAnAccount()){
-            accountManager.getAccountQuery().update(UpdateOperators.set("last-disconnection", System.currentTimeMillis())).execute();
-            accountManager.getAccountQuery().update(UpdateOperators.set("last-ip", PlayerUtil.getIp(player))).execute();
-        }
+        jedis.hset("account#" + player.getUniqueId(), "last-connection", String.valueOf(System.currentTimeMillis()));
+        jedis.hset("account#" + player.getUniqueId(), "last-ip", PlayerUtil.getIp(player));
+
+        jedis.close();
+        main.getCacheSaver().saveInDB(player.getUniqueId());
     }
 }
