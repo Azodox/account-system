@@ -1,11 +1,9 @@
 package net.valneas.account.rank;
 
-import com.google.common.base.Preconditions;
-import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.experimental.filters.Filters;
 import dev.morphia.query.experimental.updates.UpdateOperators;
 import net.valneas.account.AbstractAccountManager;
-import net.valneas.account.Account;
+import redis.clients.jedis.JedisPool;
 
 import java.util.List;
 
@@ -18,26 +16,53 @@ import java.util.List;
 
 public abstract class AbstractRankManager<E extends AbstractAccountManager<?>, T extends AbstractRankUnit & RankUnit> implements RankManager<T> {
 
+    protected final JedisPool jedisPool;
     protected final E accountManager;
 
-    public AbstractRankManager(E accountManager) {
+    public AbstractRankManager(JedisPool jedis, E accountManager) {
+        this.jedisPool = jedis;
         this.accountManager = accountManager;
     }
 
-    public UpdateResult setMajorRank(int rankPower){
-        return accountManager.getAccountQuery().update(UpdateOperators.set("major-rank", rankPower)).execute();
+    public void setMajorRank(int rankPower){
+        var jedis = jedisPool.getResource();
+        if(jedis.exists("account#" + accountManager.getAccount().getUuid())) {
+            jedis.hset("account#" + accountManager.getAccount().getUuid(), "major-rank", String.valueOf(rankPower));
+            jedis.close();
+        } else
+            accountManager.getAccountQuery().update(UpdateOperators.set("major-rank", rankPower)).execute();
     }
 
-    public UpdateResult addRank(int rankPower){
-        return accountManager.getAccountQuery().update(UpdateOperators.addToSet("ranks", rankPower)).execute();
+    public void addRank(int rankPower){
+        var uuid = accountManager.getAccount().getUuid();
+        try (var jedis = jedisPool.getResource()) {
+            if (jedis.exists("account#" + uuid)) {
+                var ranksKey = jedis.hget("account#" + uuid, "ranks");
+
+                if (jedis.sismember(ranksKey, String.valueOf(rankPower)))
+                    return;
+
+                jedis.sadd(ranksKey, String.valueOf(rankPower));
+                jedis.close();
+            } else
+                accountManager.getAccountQuery().update(UpdateOperators.addToSet("ranks", rankPower)).execute();
+        }
     }
 
-    public UpdateResult removeRank(int rankPower){
-        var query = accountManager.getAccountQuery();
-        Account account = query.first();
-        Preconditions.checkNotNull(account, "Account must exist");
+    public void removeRank(int rankPower){
+        var uuid = accountManager.getAccount().getUuid();
+        try (var jedis = jedisPool.getResource()) {
+            if (jedis.exists("account#" + uuid)) {
+                var ranksKey = jedis.hget("account#" + uuid, "ranks");
 
-        return query.update(UpdateOperators.pullAll("ranks", List.of(rankPower))).execute();
+                if (!jedis.sismember(ranksKey, String.valueOf(rankPower)))
+                    return;
+
+                jedis.srem(ranksKey, String.valueOf(rankPower));
+                jedis.close();
+            } else
+                accountManager.getAccountQuery().update(UpdateOperators.pullAll("ranks", List.of(rankPower))).execute();
+        }
     }
 
     public boolean hasExactMajorRank(int rankId){
@@ -53,11 +78,20 @@ public abstract class AbstractRankManager<E extends AbstractAccountManager<?>, T
     }
 
     public boolean hasMajorRank(){
-        return accountManager.getAccountQuery().filter(Filters.exists("major-rank")).count() != 0;
+        try (var jedis = jedisPool.getResource()) {
+            if (jedis.exists("account#" + accountManager.getAccount().getUuid())) {
+                try {
+                    return jedis.hget("account#" + accountManager.getAccount().getUuid(), "major-rank") != null;
+                } finally {
+                    jedis.close();
+                }
+            } else
+                return accountManager.getAccountQuery().filter(Filters.exists("major-rank")).count() != 0;
+        }
     }
 
     public boolean hasRanks(){
-        return !accountManager.getAccount().getRanksIds().isEmpty();
+        return this.getRanks().size() != 0;
     }
 
     public abstract T getMajorRank();

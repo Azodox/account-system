@@ -4,6 +4,7 @@ import dev.morphia.query.experimental.filters.Filters;
 import net.valneas.account.rank.PaperRankManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import redis.clients.jedis.JedisPool;
 
 import java.util.ArrayList;
 
@@ -11,13 +12,13 @@ public class PaperAccountManager extends AbstractAccountManager<PaperRankManager
 
     private final PaperAccountSystem accountSystem;
 
-    public PaperAccountManager(PaperAccountSystem accountSystem, Player player) {
-        super(accountSystem.getDatastore(), player.getName(), player.getUniqueId().toString());
+    public PaperAccountManager(PaperAccountSystem accountSystem, Player player, JedisPool jedis) {
+        super(jedis, accountSystem.getDatastore(), player.getName(), player.getUniqueId().toString());
         this.accountSystem = accountSystem;
     }
 
-    public PaperAccountManager(PaperAccountSystem accountSystem, String name, String uuid) {
-        super(accountSystem.getDatastore(), name, uuid);
+    public PaperAccountManager(PaperAccountSystem accountSystem, String name, String uuid, JedisPool jedis) {
+        super(jedis, accountSystem.getDatastore(), name, uuid);
         this.accountSystem = accountSystem;
     }
 
@@ -57,7 +58,7 @@ public class PaperAccountManager extends AbstractAccountManager<PaperRankManager
 
     @Override
     public PaperRankManager newRankManager() {
-        return new PaperRankManager(accountSystem.getRankHandler(), this);
+        return new PaperRankManager(this.jedis, accountSystem.getRankHandler(), this);
     }
 
     /*
