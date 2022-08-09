@@ -1,0 +1,41 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+plugins {
+    id 'java'
+    id 'idea'
+    id 'com.github.johnrengelman.shadow'
+}
+
+def pluginName = parent.name.toLowerCase() + '-paper'
+ext.set("pluginName", pluginName)
+group parent.group
+version parent.version
+
+compileJava.options.encoding = 'UTF-8'
+sourceCompatibility = targetCompatibility = 17
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://papermc.io/repo/repository/maven-public/'
+    }
+    maven {
+        url "https://repo.codemc.org/repository/maven-public/"
+    }
+}
+
+dependencies {
+    shadow 'io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT'
+    implementation parent
+    implementation 'io.github.llewvallis:command-builder:2.2.0'
+    implementation "io.github.leonardosnt:bungeechannelapi:1.0.0-SNAPSHOT"
+    implementation project(":common")
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        filter ReplaceTokens, tokens: [version: version]
+    }
+    duplicatesStrategy = 'include'
+}
+

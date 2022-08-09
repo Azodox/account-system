@@ -1,45 +1,51 @@
-import org.apache.tools.ant.filters.ReplaceTokens
-
 plugins {
     id 'java'
     id 'idea'
-    id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'maven-publish'
 }
 
 group 'net.valneas'
-version '0.3.3-xmas'
-
-compileJava.options.encoding = 'UTF-8'
-sourceCompatibility = targetCompatibility = 17
+version '0.6.3'
 
 repositories {
     mavenLocal()
     mavenCentral()
-    maven {
-        url "https://repo.codemc.org/repository/maven-public/"
-    }
-    maven { url "https://papermc.io/repo/repository/maven-public/" }
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    shadow "io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT"
-    implementation "io.github.llewvallis:command-builder:2.2.0"
-    implementation "io.github.leonardosnt:bungeechannelapi:1.0.0-SNAPSHOT"
-    implementation 'org.mongodb:mongodb-driver:3.12.10'
+    apiElements 'dev.morphia.morphia:morphia-core:2.2.7'
+    apiElements 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
+subprojects {
+    ext {
+        pluginName = ''
+    }
+
+    afterEvaluate {
+        repositories {
+            maven { url 'https://jitpack.io' }
+        }
+
+        dependencies {
+            implementation 'dev.morphia.morphia:morphia-core:2.2.7'
+            implementation 'org.greenrobot:eventbus-java:3.3.1'
+            annotationProcessor 'org.projectlombok:lombok:1.18.24'
+        }
+
+        jar {
+            manifest {
+                attributes 'pluginName': pluginName
+            }
+        }
+
+        shadowJar {
+            archivesBaseName = pluginName
+            archiveClassifier.set('')
+            relocate 'org.greenrobot.eventbus', 'net.valneas.account.lib.eventbus'
         }
     }
-}
-
-processResources {
-    from(sourceSets.main.resources.srcDirs) {
-        filter ReplaceTokens, tokens: [version: version]
-    }
-    duplicatesStrategy = 'include'
 }

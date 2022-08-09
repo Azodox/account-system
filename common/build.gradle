@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'idea'
+    id 'com.github.johnrengelman.shadow'
+}
+
+def pluginName = parent.name.toLowerCase() + '-common'
+ext.set("pluginName", pluginName)
+group parent.group
+version parent.version
+
+compileJava.options.encoding = 'UTF-8'
+sourceCompatibility = targetCompatibility = 17
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api project(":api")
+    implementation 'com.google.guava:guava:31.1-jre'
+    implementation parent
+}
