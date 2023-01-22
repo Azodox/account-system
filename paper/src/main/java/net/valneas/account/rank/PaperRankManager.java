@@ -2,6 +2,7 @@ package net.valneas.account.rank;
 
 import com.google.common.base.Preconditions;
 import net.valneas.account.PaperAccountManager;
+import net.valneas.account.PaperAccountSystem;
 import net.valneas.account.events.rank.MajorRankChangedEvent;
 import net.valneas.account.events.rank.RankAddedEvent;
 import net.valneas.account.events.rank.RankRemovedEvent;
@@ -104,22 +105,28 @@ public class PaperRankManager extends AbstractRankManager<PaperAccountManager, P
 
     @Override
     public PaperRankUnit getMajorRank() {
-        try (var jedis = jedisPool.getResource()) {
-            if (jedis.exists("account#" + accountManager.getAccount().getUuid()))
-                return rankHandler.getById(Integer.parseInt(jedis.hget("account#" + accountManager.getAccount().getUuid(), "major-rank"))).first();
-            else
-                return rankHandler.getById(accountManager.getAccount().getMajorRankId()).first();
-        }
+        if (PaperAccountSystem.REDIS_ENABLED) {
+            try (var jedis = jedisPool.getResource()) {
+                if (jedis.exists("account#" + accountManager.getAccount().getUuid()))
+                    return rankHandler.getById(Integer.parseInt(jedis.hget("account#" + accountManager.getAccount().getUuid(), "major-rank"))).first();
+                else
+                    return rankHandler.getById(accountManager.getAccount().getMajorRankId()).first();
+            }
+        } else
+            return rankHandler.getById(accountManager.getAccount().getMajorRankId()).first();
     }
 
     @Override
     public List<PaperRankUnit> getRanks() {
-        try (var jedis = jedisPool.getResource()) {
-            var key = "account#" + accountManager.getAccount().getUuid();
-            if (jedis.exists(key)) {
-                return jedis.smembers(jedis.hget(key, "ranks")).stream().map(Integer::parseInt).map(id -> Preconditions.checkNotNull(rankHandler.getById(id).first())).toList();
-            } else
-                return accountManager.getAccount().getRanksIds().stream().map(id -> rankHandler.getById(id).first()).filter(Objects::nonNull).toList();
-        }
+        if (PaperAccountSystem.REDIS_ENABLED) {
+            try (var jedis = jedisPool.getResource()) {
+                var key = "account#" + accountManager.getAccount().getUuid();
+                if (jedis.exists(key)) {
+                    return jedis.smembers(jedis.hget(key, "ranks")).stream().map(Integer::parseInt).map(id -> Preconditions.checkNotNull(rankHandler.getById(id).first())).toList();
+                } else
+                    return accountManager.getAccount().getRanksIds().stream().map(id -> rankHandler.getById(id).first()).filter(Objects::nonNull).toList();
+            }
+        }else
+            return accountManager.getAccount().getRanksIds().stream().map(id -> rankHandler.getById(id).first()).filter(Objects::nonNull).toList();
     }
 }

@@ -37,6 +37,7 @@ import java.io.File;
 
 public class PaperAccountSystem extends JavaPlugin implements AccountSystemApi {
 
+    public static boolean REDIS_ENABLED;
     private Mongo mongo;
     private MongoUtil mongoUtil;
     private @Getter Datastore datastore;
@@ -62,6 +63,7 @@ public class PaperAccountSystem extends JavaPlugin implements AccountSystemApi {
     public void onEnable() {
         saveDefaultConfig();
 
+        REDIS_ENABLED = getConfig().getBoolean("redis.enabled");
         mongo = new Mongo(
                 getConfig().getString("mongodb.username"),
                 getConfig().getString("mongodb.authDatabase"),
@@ -70,13 +72,15 @@ public class PaperAccountSystem extends JavaPlugin implements AccountSystemApi {
                 getConfig().getInt("mongodb.port"));
         mongoUtil = new MongoUtil(this);
 
-        this.jedisPool = new JedisPool(
-                        Preconditions.checkNotNull(getConfig().getString("redis.host"), "redis.host"),
-                        getConfig().getInt("redis.port"),
-                        Preconditions.checkNotNull(getConfig().getString("redis.user"), "redis.user"),
-                        Preconditions.checkNotNull(getConfig().getString("redis.password"), "redis.password"));
+        if (REDIS_ENABLED) {
+            this.jedisPool = new JedisPool(
+                    Preconditions.checkNotNull(getConfig().getString("redis.host"), "redis.host"),
+                    getConfig().getInt("redis.port"),
+                    Preconditions.checkNotNull(getConfig().getString("redis.user"), "redis.user"),
+                    Preconditions.checkNotNull(getConfig().getString("redis.password"), "redis.password"));
 
-        this.cacheSaver = new CacheSaver(this);
+            this.cacheSaver = new CacheSaver(this);
+        }
 
         this.datastore = new MorphiaInitializer(this.getClass(), mongo.getMongoClient(), getConfig().getString("mongodb.database"), new String[]{"net.valneas.account", "net.valneas.account.rank"}).getDatastore();
         this.rankHandler = new PaperRankHandler(datastore);
