@@ -40,6 +40,7 @@ public class PlayerJoinListener implements Listener {
 
         this.main.getPermissionDispatcher().set(player);
 
-        main.getCacheSaver().onJoin(accountManager.getAccount());
+        if(PaperAccountSystem.REDIS_ENABLED)
+            main.getCacheSaver().onJoin(accountManager.getAccount());
     }
 }
