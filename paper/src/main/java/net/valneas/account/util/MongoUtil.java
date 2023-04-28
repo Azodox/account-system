@@ -6,7 +6,6 @@ import com.mongodb.client.MongoDatabase;
 import net.valneas.account.PaperAccountManager;
 import net.valneas.account.PaperAccountSystem;
 import org.bson.Document;
-import org.bukkit.entity.Player;
 
 public class MongoUtil {
 
@@ -16,13 +15,6 @@ public class MongoUtil {
     public MongoUtil(PaperAccountSystem main) {
         this.main = main;
         this.mongo = main.getMongo().getMongoClient();
-    }
-
-
-    /** @deprecated */
-    @Deprecated
-    public PaperAccountManager getAccountManager(Player player){
-        return new PaperAccountManager(main, player);
     }
 
     public Document getByName(String name){

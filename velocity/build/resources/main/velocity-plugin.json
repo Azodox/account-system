@@ -1,0 +1,6 @@
+{
+  "id": "accountsystem-velocity",
+  "name": "accountsystem-velocity",
+  "version": "0.6.3",
+  "main": "net.valneas.account.VelocityAccountSystem"
+}

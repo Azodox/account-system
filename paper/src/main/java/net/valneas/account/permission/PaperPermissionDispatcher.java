@@ -42,7 +42,7 @@ public class PaperPermissionDispatcher implements PermissionDispatcher {
             this.accountSystem.getPermissionDatabase().setPlayerPermission(Bukkit.getPlayer(uuid));
         }else if(target instanceof PaperRankUnit rankUnit){
             Bukkit.getOnlinePlayers().forEach(player -> {
-                var account = new PaperAccountManager(this.accountSystem, player);
+                var account = new PaperAccountManager(this.accountSystem, player, accountSystem.getJedisPool());
                 var rank = account.newRankManager();
 
                 if(rank.hasExactRank(rankUnit.getId())){

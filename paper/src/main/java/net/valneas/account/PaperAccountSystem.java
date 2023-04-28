@@ -1,5 +1,6 @@
 package net.valneas.account;
 
+import com.google.common.base.Preconditions;
 import dev.morphia.Datastore;
 import io.github.llewvallis.commandbuilder.CommandBuilder;
 import io.github.llewvallis.commandbuilder.DefaultInferenceProvider;
@@ -21,6 +22,7 @@ import net.valneas.account.rank.PaperRankHandler;
 import net.valneas.account.rank.RankHandler;
 import net.valneas.account.rank.RankManager;
 import net.valneas.account.rank.RankUnit;
+import net.valneas.account.util.CacheSaver;
 import net.valneas.account.util.MongoUtil;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -29,11 +31,13 @@ import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
+import redis.clients.jedis.JedisPool;
 
 import java.io.File;
 
 public class PaperAccountSystem extends JavaPlugin implements AccountSystemApi {
 
+    public static boolean REDIS_ENABLED;
     private Mongo mongo;
     private MongoUtil mongoUtil;
     private @Getter Datastore datastore;
@@ -45,9 +49,12 @@ public class PaperAccountSystem extends JavaPlugin implements AccountSystemApi {
      * and send him a message or if the server is not linked
      * with a BungeeCord then it's not necessary to chase him in the proxy because there isn't.
      * So anyway, in this case just use basic methods
+     *
      * @see MajorRankChangedListener
      */
     private boolean bungeeMode;
+    private @Getter JedisPool jedisPool;
+    private @Getter CacheSaver cacheSaver;
 
     /**
      * Plugin initialization
@@ -56,13 +63,31 @@ public class PaperAccountSystem extends JavaPlugin implements AccountSystemApi {
     public void onEnable() {
         saveDefaultConfig();
 
-        mongo = new Mongo(
-                getConfig().getString("mongodb.username"),
-                getConfig().getString("mongodb.authDatabase"),
-                getConfig().getString("mongodb.password"),
-                getConfig().getString("mongodb.host"),
-                getConfig().getInt("mongodb.port"));
+        REDIS_ENABLED = getConfig().getBoolean("redis.enabled");
+
+        if(getConfig().getBoolean("mongodb.auth")) {
+            mongo = new Mongo(
+                    getConfig().getString("mongodb.username"),
+                    getConfig().getString("mongodb.authDatabase"),
+                    getConfig().getString("mongodb.password"),
+                    getConfig().getString("mongodb.host"),
+                    getConfig().getInt("mongodb.port"));
+        }else {
+            mongo = new Mongo(
+                    getConfig().getString("mongodb.host"),
+                    getConfig().getInt("mongodb.port"));
+        }
         mongoUtil = new MongoUtil(this);
+
+        if (REDIS_ENABLED) {
+            this.jedisPool = new JedisPool(
+                    Preconditions.checkNotNull(getConfig().getString("redis.host"), "redis.host"),
+                    getConfig().getInt("redis.port"),
+                    Preconditions.checkNotNull(getConfig().getString("redis.user"), "redis.user"),
+                    Preconditions.checkNotNull(getConfig().getString("redis.password"), "redis.password"));
+
+            this.cacheSaver = new CacheSaver(this);
+        }
 
         this.datastore = new MorphiaInitializer(this.getClass(), mongo.getMongoClient(), getConfig().getString("mongodb.database"), new String[]{"net.valneas.account", "net.valneas.account.rank"}).getDatastore();
         this.rankHandler = new PaperRankHandler(datastore);
@@ -76,7 +101,7 @@ public class PaperAccountSystem extends JavaPlugin implements AccountSystemApi {
         YamlConfiguration yml = YamlConfiguration.loadConfiguration(spigotYml);
         bungeeMode = yml.getBoolean("settings.bungeecord");
 
-        if(bungeeMode){
+        if (bungeeMode) {
             getLogger().info("---------------------------------------------");
             getLogger().info("Warning: field in spigot.yml called bungeecord is enabled!");
             getLogger().info("Switching to bungeecord mode...");
@@ -103,6 +128,11 @@ public class PaperAccountSystem extends JavaPlugin implements AccountSystemApi {
         getLogger().info("Enabled!");
     }
 
+    @Override
+    public void onDisable() {
+        mongo.getMongoClient().close();
+    }
+
     /**
      * Registering events
      */
@@ -115,9 +145,10 @@ public class PaperAccountSystem extends JavaPlugin implements AccountSystemApi {
 
     /**
      * Register a listener
+     *
      * @param listeners : Listener to register
      */
-    private void registerListeners(Listener...listeners){
+    private void registerListeners(Listener... listeners) {
         for (Listener listener : listeners) {
             getServer().getPluginManager().registerEvents(listener, this);
         }
@@ -125,6 +156,7 @@ public class PaperAccountSystem extends JavaPlugin implements AccountSystemApi {
 
     /**
      * Get a mongo class instance
+     *
      * @return mongo class instance
      */
     public Mongo getMongo() {
@@ -133,6 +165,7 @@ public class PaperAccountSystem extends JavaPlugin implements AccountSystemApi {
 
     /**
      * Get a mongo util class instance
+     *
      * @return mongo util class instance
      */
     public MongoUtil getMongoUtil() {
@@ -151,6 +184,7 @@ public class PaperAccountSystem extends JavaPlugin implements AccountSystemApi {
 
     /**
      * Check if bungeeMode is enabled.
+     *
      * @return bungeeMode
      */
     public boolean isBungeeMode() {
@@ -166,9 +200,9 @@ public class PaperAccountSystem extends JavaPlugin implements AccountSystemApi {
     @NotNull
     @Override
     public <A extends AbstractAccount, R extends RankManager<? extends RankUnit>, T> AccountManager<A, R> getAccountManager(T playerType) {
-        if(playerType instanceof Player player){
-            return (AccountManager<A, R>) new PaperAccountManager(this, player);
-        }else{
+        if (playerType instanceof Player player) {
+            return (AccountManager<A, R>) new PaperAccountManager(this, player, jedisPool);
+        } else {
             throw new IllegalArgumentException("Wrong player type for this platform.");
         }
     }

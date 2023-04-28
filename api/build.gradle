@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    implementation parent
+    api 'dev.morphia.morphia:morphia-core:2.2.7'
 }
 
 publishing {
@@ -27,7 +27,7 @@ publishing {
             groupId = 'io.github.azodox'
             artifactId = pluginName
             version = version /*+ '-SNAPSHOT'*/
-            project.shadow.component(publication)
+            from components.java
 
             pom {
                 description = 'My original way to manage accounts on a minecraft server.'
@@ -58,7 +58,7 @@ publishing {
         maven {
             //Snapshot repo : 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
             //Release repo : 'https://s01.oss.sonatype.org/content/repositories/releases/'
-            url 'https://s01.oss.sonatype.org/content/repositories/releases/'
+            url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
 
             credentials {
                 username = findProperty("centralUser")

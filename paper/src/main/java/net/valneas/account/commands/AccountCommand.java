@@ -58,7 +58,7 @@ public class AccountCommand implements CommandExecutor {
          */
         if(sender instanceof Player){
             final Player player = (Player) sender;
-            final PaperAccountManager accountManager = new PaperAccountManager(main, player);
+            final PaperAccountManager accountManager = new PaperAccountManager(main, player, main.getJedisPool());
 //            final Rank rank = accountManager.newRankManager();
 
             /*

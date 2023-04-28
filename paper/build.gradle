@@ -25,11 +25,12 @@ repositories {
 }
 
 dependencies {
-    shadow 'io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT'
+    compileOnly 'io.papermc.paper:paper-api:1.19.1-R0.1-SNAPSHOT'
     implementation parent
     implementation 'io.github.llewvallis:command-builder:2.2.0'
     implementation "io.github.leonardosnt:bungeechannelapi:1.0.0-SNAPSHOT"
     implementation project(":common")
+    implementation 'dev.morphia.morphia:morphia-core:2.2.7'
 }
 
 processResources {

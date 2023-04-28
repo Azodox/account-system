@@ -23,7 +23,7 @@ public class PaperPermissionDatabase extends AbstractPermissionDatabase<PaperPer
     }
 
     public void setPlayerPermission(Player player){
-        var account = new PaperAccountManager(this.accountSystem, player);
+        var account = new PaperAccountManager(this.accountSystem, player, accountSystem.getJedisPool());
         var rank = account.newRankManager();
 
         player.getEffectivePermissions()
