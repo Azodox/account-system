@@ -64,12 +64,19 @@ public class PaperAccountSystem extends JavaPlugin implements AccountSystemApi {
         saveDefaultConfig();
 
         REDIS_ENABLED = getConfig().getBoolean("redis.enabled");
-        mongo = new Mongo(
-                getConfig().getString("mongodb.username"),
-                getConfig().getString("mongodb.authDatabase"),
-                getConfig().getString("mongodb.password"),
-                getConfig().getString("mongodb.host"),
-                getConfig().getInt("mongodb.port"));
+
+        if(getConfig().getBoolean("mongodb.auth")) {
+            mongo = new Mongo(
+                    getConfig().getString("mongodb.username"),
+                    getConfig().getString("mongodb.authDatabase"),
+                    getConfig().getString("mongodb.password"),
+                    getConfig().getString("mongodb.host"),
+                    getConfig().getInt("mongodb.port"));
+        }else {
+            mongo = new Mongo(
+                    getConfig().getString("mongodb.host"),
+                    getConfig().getInt("mongodb.port"));
+        }
         mongoUtil = new MongoUtil(this);
 
         if (REDIS_ENABLED) {
@@ -119,6 +126,11 @@ public class PaperAccountSystem extends JavaPlugin implements AccountSystemApi {
         registerAccountSystemService();
         registerRankHandlerService();
         getLogger().info("Enabled!");
+    }
+
+    @Override
+    public void onDisable() {
+        mongo.getMongoClient().close();
     }
 
     /**

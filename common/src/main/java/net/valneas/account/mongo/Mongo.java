@@ -51,6 +51,29 @@ public class Mongo {
         this.mongoClient = MongoClients.create(options);
     }
 
+    public Mongo(String host, int port) {
+        MongoClientSettings options = MongoClientSettings.builder()
+                .applyToClusterSettings(builder -> {
+                    builder.hosts(List.of(new ServerAddress(host, port)));
+                    builder.mode(ClusterConnectionMode.MULTIPLE);
+                    builder.serverSelectionTimeout(10, TimeUnit.SECONDS);
+                })
+                .applyToConnectionPoolSettings(builder ->{
+                    builder.maxWaitTime(30, TimeUnit.SECONDS);
+                    builder.maxConnectionLifeTime(2, TimeUnit.HOURS);
+                    builder.maxConnectionIdleTime(30, TimeUnit.MINUTES);
+                })
+                .applyToSocketSettings(builder -> {
+                    builder.connectTimeout(10, TimeUnit.SECONDS);
+                    builder.readTimeout(30, TimeUnit.SECONDS);
+                })
+                .uuidRepresentation(UuidRepresentation.STANDARD)
+                .writeConcern(WriteConcern.ACKNOWLEDGED)
+                .build();
+
+        this.mongoClient = MongoClients.create(options);
+    }
+
     public MongoClient getMongoClient() {
         return mongoClient;
     }
