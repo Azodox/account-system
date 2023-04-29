@@ -42,6 +42,8 @@ public class PaperRankManager extends AbstractRankManager<PaperAccountManager, P
         Preconditions.checkNotNull(sender, "CommandSender cannot be null");
 
         PaperRankUnit previousMajorRank = this.getMajorRank();
+        super.setMajorRank(rankId);
+
         if (event && sender instanceof CommandSender commandSender) {
             EventBus.getDefault().post(new MajorRankChangedEvent<>(this.accountManager, previousMajorRank.getId(), rankId, commandSender));
         }
