@@ -25,44 +25,55 @@ public abstract class AbstractRankManager<E extends AbstractAccountManager<?>, T
     }
 
     public void setMajorRank(int rankPower){
-        var jedis = jedisPool.getResource();
-        if(jedis.exists("account#" + accountManager.getAccount().getUuid())) {
-            jedis.hset("account#" + accountManager.getAccount().getUuid(), "major-rank", String.valueOf(rankPower));
-            jedis.close();
-        } else
+        if(jedisPool != null) {
+            try (var jedis = jedisPool.getResource()) {
+                if(jedis.exists("account#" + accountManager.getAccount().getUuid())) {
+                    jedis.hset("account#" + accountManager.getAccount().getUuid(), "major-rank", String.valueOf(rankPower));
+                    jedis.close();
+                } else
+                    accountManager.getAccountQuery().update(UpdateOperators.set("major-rank", rankPower)).execute();
+            }
+        }else {
             accountManager.getAccountQuery().update(UpdateOperators.set("major-rank", rankPower)).execute();
+        }
     }
 
     public void addRank(int rankPower){
         var uuid = accountManager.getAccount().getUuid();
-        try (var jedis = jedisPool.getResource()) {
-            if (jedis.exists("account#" + uuid)) {
-                var ranksKey = jedis.hget("account#" + uuid, "ranks");
+        if(jedisPool != null) {
+            try (var jedis = jedisPool.getResource()) {
+                if (jedis.exists("account#" + uuid)) {
+                    var ranksKey = jedis.hget("account#" + uuid, "ranks");
 
-                if (jedis.sismember(ranksKey, String.valueOf(rankPower)))
-                    return;
+                    if (jedis.sismember(ranksKey, String.valueOf(rankPower)))
+                        return;
 
-                jedis.sadd(ranksKey, String.valueOf(rankPower));
-                jedis.close();
-            } else
-                accountManager.getAccountQuery().update(UpdateOperators.addToSet("ranks", rankPower)).execute();
-        }
+                    jedis.sadd(ranksKey, String.valueOf(rankPower));
+                    jedis.close();
+                } else
+                    accountManager.getAccountQuery().update(UpdateOperators.addToSet("ranks", rankPower)).execute();
+            }
+        } else
+            accountManager.getAccountQuery().update(UpdateOperators.addToSet("ranks", rankPower)).execute();
     }
 
     public void removeRank(int rankPower){
         var uuid = accountManager.getAccount().getUuid();
-        try (var jedis = jedisPool.getResource()) {
-            if (jedis.exists("account#" + uuid)) {
-                var ranksKey = jedis.hget("account#" + uuid, "ranks");
+        if(jedisPool != null) {
+            try (var jedis = jedisPool.getResource()) {
+                if (jedis.exists("account#" + uuid)) {
+                    var ranksKey = jedis.hget("account#" + uuid, "ranks");
 
-                if (!jedis.sismember(ranksKey, String.valueOf(rankPower)))
-                    return;
+                    if (!jedis.sismember(ranksKey, String.valueOf(rankPower)))
+                        return;
 
-                jedis.srem(ranksKey, String.valueOf(rankPower));
-                jedis.close();
-            } else
-                accountManager.getAccountQuery().update(UpdateOperators.pullAll("ranks", List.of(rankPower))).execute();
-        }
+                    jedis.srem(ranksKey, String.valueOf(rankPower));
+                    jedis.close();
+                } else
+                    accountManager.getAccountQuery().update(UpdateOperators.pullAll("ranks", List.of(rankPower))).execute();
+            }
+        }else
+            accountManager.getAccountQuery().update(UpdateOperators.pullAll("ranks", List.of(rankPower))).execute();
     }
 
     public boolean hasExactMajorRank(int rankId){
@@ -78,16 +89,19 @@ public abstract class AbstractRankManager<E extends AbstractAccountManager<?>, T
     }
 
     public boolean hasMajorRank(){
-        try (var jedis = jedisPool.getResource()) {
-            if (jedis.exists("account#" + accountManager.getAccount().getUuid())) {
-                try {
-                    return jedis.hget("account#" + accountManager.getAccount().getUuid(), "major-rank") != null;
-                } finally {
-                    jedis.close();
-                }
-            } else
-                return accountManager.getAccountQuery().filter(Filters.exists("major-rank")).count() != 0;
+        if(jedisPool != null) {
+            try (var jedis = jedisPool.getResource()) {
+                if (jedis.exists("account#" + accountManager.getAccount().getUuid())) {
+                    try {
+                        return jedis.hget("account#" + accountManager.getAccount().getUuid(), "major-rank") != null;
+                    } finally {
+                        jedis.close();
+                    }
+                }else
+                    return accountManager.getAccountQuery().filter(Filters.exists("major-rank")).count() != 0;
+            }
         }
+        return accountManager.getAccountQuery().filter(Filters.exists("major-rank")).count() != 0;
     }
 
     public boolean hasRanks(){
